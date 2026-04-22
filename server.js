@@ -8,6 +8,16 @@ const publicDir = __dirname;
 let totalFinds = 0;
 let latestFind = null;
 
+function getPhotoFiles() {
+  return fs
+    .readdirSync(path.join(publicDir, "assets"), { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name)
+    .filter((name) => /\.(jpe?g|png|webp)$/i.test(name))
+    .sort()
+    .map((name) => `/assets/${name}`);
+}
+
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -60,6 +70,11 @@ function serveStatic(req, res) {
 const server = http.createServer((req, res) => {
   if (req.url === "/api/stats" && req.method === "GET") {
     sendJson(res, 200, { totalFinds, latestFind });
+    return;
+  }
+
+  if (req.url === "/api/photos" && req.method === "GET") {
+    sendJson(res, 200, { photos: getPhotoFiles() });
     return;
   }
 
