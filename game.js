@@ -91,6 +91,22 @@ const decoyPool = [
   { x: 740, y: 386, w: 128, h: 110, type: "nest" },
 ];
 
+const wallDecorPool = [
+  { x: 54, y: 104, w: 168, h: 116, type: "screen" },
+  { x: 286, y: 112, w: 136, h: 78, type: "shelf" },
+  { x: 552, y: 112, w: 126, h: 86, type: "frame" },
+  { x: 748, y: 118, w: 112, h: 118, type: "window" },
+];
+
+const floorDecorPool = [
+  { x: 116, y: 348, w: 186, h: 100, type: "sofa" },
+  { x: 356, y: 390, w: 142, h: 98, type: "plant" },
+  { x: 802, y: 360, w: 74, h: 124, type: "scratcher" },
+  { x: 250, y: 466, w: 114, h: 56, type: "toy" },
+  { x: 536, y: 454, w: 112, h: 58, type: "bookpile" },
+  { x: 72, y: 448, w: 112, h: 76, type: "food" },
+];
+
 let photos = fallbackPhotos;
 let sessionCases = [];
 let levelIndex = 0;
@@ -131,8 +147,15 @@ function pickSessionCases() {
   sessionCases = shuffle(allCases).slice(0, 5).map((item) => {
     const decoys = shuffle(decoyPool)
       .filter((decoy) => !overlaps(decoy, item.target))
-      .slice(0, 5);
-    return { ...item, decoys };
+      .slice(0, 4);
+    const occupied = [item.target, ...decoys];
+    const wallDecor = shuffle(wallDecorPool)
+      .filter((decor) => !occupied.some((area) => overlaps(decor, area)))
+      .slice(0, 2);
+    const floorDecor = shuffle(floorDecorPool)
+      .filter((decor) => !occupied.some((area) => overlaps(decor, area)))
+      .slice(0, 1);
+    return { ...item, decoys, decorations: [...wallDecor, ...floorDecor] };
   });
 }
 
@@ -176,35 +199,27 @@ async function recordFind(levelName) {
   }
 }
 
-function drawRoom() {
+function drawRoom(current) {
   pixelRect(0, 0, 960, 640, palette.wall);
-  for (let y = 26; y < 330; y += 30) pixelRect(0, y, 960, 4, y % 60 === 26 ? palette.wallDark : "#60705f");
-  for (let x = 48; x < 920; x += 96) pixelRect(x, 0, 5, 330, "rgba(35, 42, 36, 0.34)");
+  for (let y = 36; y < 318; y += 42) pixelRect(0, y, 960, 4, y % 84 === 36 ? palette.wallDark : "#60705f");
+  for (let x = 64; x < 920; x += 128) pixelRect(x, 0, 5, 330, "rgba(35, 42, 36, 0.24)");
 
   pixelRect(0, 330, 960, 310, palette.floor);
-  for (let y = 348; y < 640; y += 34) {
-    for (let x = y % 68 ? -30 : 18; x < 960; x += 86) {
+  for (let y = 354; y < 640; y += 46) {
+    for (let x = y % 92 ? -24 : 22; x < 960; x += 112) {
       pixelRect(x, y, 54, 5, palette.floorDark);
-      pixelRect(x + 58, y + 12, 28, 5, palette.floorLight);
+      pixelRect(x + 60, y + 14, 28, 5, palette.floorLight);
     }
   }
 
-  drawObject({ x: 54, y: 104, w: 168, h: 116, type: "screen" }, false);
-  drawDecorations();
+  drawDecorations(current.decorations || []);
   pixelRect(36, 522, 888, 22, "#252b23");
   pixelRect(70, 544, 44, 58, "#131711");
   pixelRect(846, 544, 44, 58, "#131711");
 }
 
-function drawDecorations() {
-  drawObject({ x: 288, y: 112, w: 136, h: 78, type: "shelf" }, false);
-  drawObject({ x: 566, y: 110, w: 126, h: 86, type: "frame" }, false);
-  drawObject({ x: 784, y: 118, w: 96, h: 118, type: "window" }, false);
-  drawObject({ x: 94, y: 346, w: 220, h: 112, type: "sofa" }, false);
-  drawObject({ x: 358, y: 382, w: 142, h: 98, type: "plant" }, false);
-  drawObject({ x: 802, y: 360, w: 74, h: 124, type: "scratcher" }, false);
-  drawObject({ x: 246, y: 462, w: 114, h: 56, type: "toy" }, false);
-  drawObject({ x: 538, y: 452, w: 112, h: 58, type: "bookpile" }, false);
+function drawDecorations(decorations) {
+  decorations.forEach((decor) => drawObject(decor, false));
 }
 
 function drawObject(area, isTarget) {
@@ -368,7 +383,7 @@ function drawScanner() {
 function render() {
   const current = sessionCases[levelIndex];
   if (!current) return requestAnimationFrame(render);
-  drawRoom();
+  drawRoom(current);
   current.decoys.forEach((item) => drawObject(item, false));
   drawObject(current.target, true);
   drawCat(current.target);
