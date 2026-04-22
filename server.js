@@ -59,9 +59,10 @@ function serveStatic(req, res) {
     }
 
     const ext = path.extname(filePath).toLowerCase();
+    const noStore = new Set([".html", ".css", ".js", ".json"]);
     res.writeHead(200, {
       "Content-Type": mimeTypes[ext] || "application/octet-stream",
-      "Cache-Control": ext === ".html" ? "no-store" : "public, max-age=3600",
+      "Cache-Control": noStore.has(ext) ? "no-store" : "public, max-age=3600",
     });
     fs.createReadStream(filePath).pipe(res);
   });
