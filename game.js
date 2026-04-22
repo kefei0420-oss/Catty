@@ -161,7 +161,11 @@ function shuffle(items) {
 }
 
 function pickSessionCases() {
-  sessionCases = shuffle(allCases).slice(0, 5).map((item) => {
+  const sessionPhotos = photos.length >= 5
+    ? shuffle(photos).slice(0, 5)
+    : Array.from({ length: 5 }, (_, index) => photos[index % photos.length] || fallbackPhotos[index % fallbackPhotos.length]);
+
+  sessionCases = shuffle(allCases).slice(0, 5).map((item, index) => {
     const decoys = shuffle(decoyPool)
       .filter((decoy) => !overlaps(decoy, item.target))
       .slice(0, 4);
@@ -172,7 +176,7 @@ function pickSessionCases() {
     const floorDecor = shuffle(floorDecorPool)
       .filter((decor) => !occupied.some((area) => overlaps(decor, area)))
       .slice(0, 1);
-    return { ...item, decoys, decorations: [...wallDecor, ...floorDecor] };
+    return { ...item, photo: sessionPhotos[index], decoys, decorations: [...wallDecor, ...floorDecor] };
   });
 }
 
@@ -183,10 +187,6 @@ function overlaps(a, b) {
 function pixelRect(x, y, w, h, color) {
   ctx.fillStyle = color;
   ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
-}
-
-function choosePhoto(index) {
-  return photos[index % photos.length] || fallbackPhotos[0];
 }
 
 function loadProfile() {
@@ -294,10 +294,6 @@ async function loadPhotos() {
     const data = await response.json();
     if (Array.isArray(data.photos) && data.photos.length) photos = data.photos;
     migrateCollectionToCurrentPhotos();
-    if (sessionCases.length) {
-      roundPhotoThumb.src = currentPhoto();
-      roundPhotoThumb.alt = `${sessionCases[levelIndex].name} 的猫猫照片`;
-    }
   } catch {
     photos = fallbackPhotos;
   }
@@ -508,7 +504,7 @@ function render() {
 }
 
 function currentPhoto() {
-  return choosePhoto(levelIndex);
+  return sessionCases[levelIndex]?.photo || photos[0] || fallbackPhotos[0];
 }
 
 function canvasPoint(event) {
@@ -548,7 +544,7 @@ function revealCat(auto = false) {
   foundCard.classList.add("show");
   foundCard.setAttribute("aria-hidden", "false");
   nextButton.disabled = false;
-  nextButton.textContent = levelIndex === sessionCases.length - 1 ? "照片奖励" : "下一关";
+  nextButton.textContent = levelIndex === sessionCases.length - 1 ? (rewardGranted ? "查看图鉴" : "领取奖励") : "下一关";
   setToast(auto ? "时间到，猫猫自己露面了。" : "找到猫猫。");
   beep(true);
   updateHud();
@@ -601,7 +597,6 @@ function loadLevel(index) {
   nextButton.textContent = "下一关";
   foundCard.classList.remove("show");
   foundCard.setAttribute("aria-hidden", "true");
-  hideFinalGallery();
   caseLabel.textContent = `Case ${String(levelIndex + 1).padStart(2, "0")}`;
   caseTitle.textContent = current.name;
   caseClue.textContent = current.clue;
@@ -631,17 +626,11 @@ function nextSlide(step = 1) {
 }
 
 function showFinalGallery() {
-  slideIndex = 0;
-  renderSlide();
-  finalGallery.classList.add("show");
-  finalGallery.setAttribute("aria-hidden", "false");
   rewardFanfare();
   if (!rewardGranted) {
     rewardGranted = true;
     grantPuzzlePiece();
   }
-  clearInterval(slideTimer);
-  slideTimer = setInterval(() => nextSlide(1), 2200);
 }
 
 function hideFinalGallery() {
@@ -860,9 +849,14 @@ hintButton.addEventListener("click", () => {
 
 nextButton.addEventListener("click", () => {
   if (levelIndex === sessionCases.length - 1) {
-    setToast(`通关：找到 ${found} 次猫猫。`);
-    showFinalGallery();
-    nextButton.disabled = true;
+    if (!rewardGranted) {
+      setToast(`通关：找到 ${found} 次猫猫。`);
+      showFinalGallery();
+      nextButton.textContent = "查看图鉴";
+      nextButton.disabled = false;
+      return;
+    }
+    showCodex();
     return;
   }
   loadLevel(levelIndex + 1);
@@ -871,9 +865,6 @@ nextButton.addEventListener("click", () => {
 resetButton.addEventListener("click", newGame);
 musicButton.addEventListener("click", () => toggleMusic(false));
 codexButton.addEventListener("click", showCodex);
-closeGalleryButton.addEventListener("click", hideFinalGallery);
-prevSlideButton.addEventListener("click", () => nextSlide(-1));
-nextSlideButton.addEventListener("click", () => nextSlide(1));
 roundPhotoButton.addEventListener("click", showRoundPhoto);
 closePhotoButton.addEventListener("click", hideRoundPhoto);
 closePieceRewardButton.addEventListener("click", hidePieceReward);
@@ -892,7 +883,10 @@ codexModal.addEventListener("click", (event) => {
   if (event.target === codexModal) hideCodex();
 });
 
-loadPhotos();
-pickSessionCases();
-loadLevel(0);
-render();
+async function init() {
+  await loadPhotos();
+  newGame();
+  render();
+}
+
+init();
