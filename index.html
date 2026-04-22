@@ -14,7 +14,7 @@
           <p>Catty</p>
         </div>
         <h1>找猫猫</h1>
-        <p class="tagline">像素房间里，灰白小猫正在偷偷观察你。</p>
+        <p class="tagline">每局随机 5 个地点，安静观察房间，把藏起来的猫猫找出来。</p>
       </section>
 
       <section class="game-panel" aria-label="找猫猫游戏">
@@ -32,52 +32,36 @@
             <strong id="scoreText">0</strong>
           </div>
           <div class="stat">
-            <span>全站</span>
-            <strong id="globalText">0</strong>
+            <span>专注</span>
+            <strong id="focusText">100</strong>
           </div>
-          <button id="soundButton" class="icon-button" type="button" aria-label="声音" title="声音">♪</button>
+          <button id="musicButton" class="icon-button" type="button" aria-label="音乐" title="音乐">♪</button>
           <button id="resetButton" class="icon-button" type="button" aria-label="重开" title="重开">↻</button>
         </div>
 
-        <div class="play-area">
-          <div class="case-bar" aria-label="猫猫线索">
-            <div class="case-copy">
-              <span id="caseLabel">Case 01</span>
-              <div>
-                <strong id="caseTitle">灰白小猫失踪案</strong>
-                <p id="caseClue">正在读取猫猫线索...</p>
-              </div>
-            </div>
-            <div class="mini-stats">
-              <div>
-                <span>专注</span>
-                <strong id="focusText">100</strong>
-              </div>
-              <div>
-                <span>连胜</span>
-                <strong id="streakText">0</strong>
-              </div>
+        <div class="case-bar">
+          <span id="caseLabel">Case 01</span>
+          <div>
+            <strong id="caseTitle">读取猫猫地点中</strong>
+            <p id="caseClue">请观察房间里的家具、阴影和反光。</p>
+          </div>
+        </div>
+
+        <div class="stage-wrap">
+          <canvas id="gameCanvas" width="960" height="640" aria-label="像素猫猫房间"></canvas>
+          <div id="toast" class="toast" role="status" aria-live="polite"></div>
+          <div id="foundCard" class="found-card" aria-hidden="true">
+            <img id="foundImage" src="" alt="找到的猫猫照片">
+            <div>
+              <p id="foundTitle">找到啦</p>
+              <span id="foundNote">照片已收进猫猫档案。</span>
             </div>
           </div>
-
-          <div class="stage-wrap">
-            <canvas id="gameCanvas" width="960" height="640" aria-label="像素猫猫房间"></canvas>
-            <div id="toast" class="toast" role="status" aria-live="polite"></div>
-            <div id="foundCard" class="found-card" aria-hidden="true">
-              <img id="foundImage" src="" alt="找到的猫猫照片">
-              <div>
-                <p id="foundTitle">找到啦</p>
-                <span id="foundNote">照片已收进猫猫档案。</span>
-              </div>
-            </div>
-          </div>
-
-          <div id="photoStrip" class="photo-strip" aria-label="猫猫相册"></div>
         </div>
 
         <div class="controls">
           <button id="hintButton" class="primary-button" type="button">线索</button>
-          <button id="nextButton" class="primary-button" type="button" disabled>下一案</button>
+          <button id="nextButton" class="primary-button" type="button" disabled>下一关</button>
         </div>
       </section>
 
@@ -85,8 +69,8 @@
         <div class="gallery-panel">
           <div class="gallery-head">
             <div>
-              <span>Case closed</span>
-              <h2>猫猫照片奖励</h2>
+              <span>Reward</span>
+              <h2>全部猫猫照片</h2>
             </div>
             <button id="closeGalleryButton" class="icon-button" type="button" aria-label="关闭照片墙" title="关闭">×</button>
           </div>

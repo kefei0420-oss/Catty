@@ -4,9 +4,7 @@ const ctx = canvas.getContext("2d");
 const levelText = document.querySelector("#levelText");
 const timeText = document.querySelector("#timeText");
 const scoreText = document.querySelector("#scoreText");
-const globalText = document.querySelector("#globalText");
 const focusText = document.querySelector("#focusText");
-const streakText = document.querySelector("#streakText");
 const toast = document.querySelector("#toast");
 const foundCard = document.querySelector("#foundCard");
 const foundImage = document.querySelector("#foundImage");
@@ -15,21 +13,20 @@ const foundNote = document.querySelector("#foundNote");
 const caseLabel = document.querySelector("#caseLabel");
 const caseTitle = document.querySelector("#caseTitle");
 const caseClue = document.querySelector("#caseClue");
-const photoStrip = document.querySelector("#photoStrip");
 const finalGallery = document.querySelector("#finalGallery");
 const galleryGrid = document.querySelector("#galleryGrid");
 const closeGalleryButton = document.querySelector("#closeGalleryButton");
 const hintButton = document.querySelector("#hintButton");
 const nextButton = document.querySelector("#nextButton");
 const resetButton = document.querySelector("#resetButton");
-const soundButton = document.querySelector("#soundButton");
+const musicButton = document.querySelector("#musicButton");
 
 const palette = {
-  wall: "#4f5d50",
-  wallDark: "#323b34",
-  floor: "#6f6858",
+  wall: "#52614f",
+  wallDark: "#354039",
+  floor: "#716a58",
   floorDark: "#514d43",
-  floorLight: "#837c69",
+  floorLight: "#8a806a",
   ink: "#141710",
   white: "#f3eddc",
   grey: "#646b64",
@@ -38,7 +35,6 @@ const palette = {
   pink: "#ff8fa3",
   green: "#8bd46f",
   blue: "#73b7ff",
-  red: "#d65d55",
 };
 
 const fallbackPhotos = [
@@ -56,88 +52,83 @@ const fallbackPhotos = [
   "assets/20260422-225115.jpeg",
 ];
 
-const cases = [
-  {
-    name: "床边潜伏",
-    time: 50,
-    clue: "白色前爪、灰色耳朵、靠近柔软边缘。",
-    hint: ["留意床边阴影。", "有一只眼睛在布料下面反光。", "左下角的被子不是完全平的。"],
-    target: { x: 146, y: 396, w: 182, h: 94, type: "blanket" },
-    decoys: [
-      { x: 602, y: 338, w: 176, h: 106, type: "pillow" },
-      { x: 778, y: 166, w: 92, h: 132, type: "box" },
-      { x: 440, y: 402, w: 130, h: 82, type: "rug" },
-    ],
-    reward: "白爪爪从被边露出来了。",
-  },
-  {
-    name: "纸箱审讯",
-    time: 48,
-    clue: "橘色纸箱附近，灰白轮廓藏在开口背后。",
-    hint: ["纸箱边缘有细小白线。", "右上方的阴影太圆了。", "猫在纸箱，不在箱子旁边。"],
-    target: { x: 742, y: 118, w: 136, h: 126, type: "box" },
-    decoys: [
-      { x: 116, y: 348, w: 186, h: 100, type: "sofa" },
-      { x: 566, y: 392, w: 144, h: 82, type: "basket" },
-      { x: 382, y: 172, w: 160, h: 118, type: "window" },
-    ],
-    reward: "箱子开口里出现了蜂蜜色眼睛。",
-  },
-  {
-    name: "玻璃桌下",
-    time: 44,
-    clue: "黑色桌面、灰色地面，猫会把自己伪装成一团阴影。",
-    hint: ["找一块不对称的暗影。", "它离桌腿很近。", "右侧玻璃桌下面有胡须。"],
-    target: { x: 682, y: 360, w: 150, h: 86, type: "table" },
-    decoys: [
-      { x: 94, y: 388, w: 168, h: 82, type: "blanket" },
-      { x: 338, y: 390, w: 150, h: 92, type: "plant" },
-      { x: 530, y: 210, w: 118, h: 140, type: "cabinet" },
-    ],
-    reward: "玻璃反光里藏着一张小猫脸。",
-  },
-  {
-    name: "窗台冷案",
-    time: 42,
-    clue: "金色眼睛会先被月光发现。",
-    hint: ["窗户里的亮点有两个。", "窗台边缘比其他地方厚。", "猫趴在窗台右侧。"],
-    target: { x: 458, y: 170, w: 164, h: 112, type: "window" },
-    decoys: [
-      { x: 118, y: 392, w: 184, h: 94, type: "sofa" },
-      { x: 702, y: 362, w: 138, h: 104, type: "box" },
-      { x: 336, y: 416, w: 150, h: 70, type: "rug" },
-    ],
-    reward: "窗台记录员确认猫猫在岗。",
-  },
-  {
-    name: "终极猫窝",
-    time: 38,
-    clue: "最像猫窝的地方，反而要看第二眼。",
-    hint: ["圆形轮廓里有灰色缺口。", "猫窝中央的白块不是垫子。", "点猫窝靠右的阴影。"],
-    target: { x: 438, y: 360, w: 226, h: 136, type: "nest" },
-    decoys: [
-      { x: 116, y: 220, w: 120, h: 150, type: "lamp" },
-      { x: 740, y: 210, w: 124, h: 142, type: "cabinet" },
-      { x: 108, y: 410, w: 140, h: 74, type: "basket" },
-    ],
-    reward: "猫窝终于承认它今天藏了一只猫。",
-  },
+const allCases = [
+  makeCase("床边潜伏", "白色前爪、灰色耳朵，通常贴着软软的布料边缘。", "白爪爪从被边露出来了。", 50, { x: 146, y: 396, w: 182, h: 94, type: "blanket" }),
+  makeCase("纸箱审讯", "纸箱口的阴影很深，里面可能有一双蜂蜜色眼睛。", "箱子开口里出现了猫猫脸。", 48, { x: 742, y: 118, w: 136, h: 126, type: "box" }),
+  makeCase("玻璃桌下", "灰色地面上，有一块不像家具的暗影。", "玻璃反光里藏着一张小猫脸。", 45, { x: 682, y: 360, w: 150, h: 86, type: "table" }),
+  makeCase("窗台冷案", "月光和眼睛都很亮，但只有一个亮点会看你。", "窗台记录员确认猫猫在岗。", 44, { x: 458, y: 170, w: 164, h: 112, type: "window" }),
+  makeCase("终极猫窝", "越像猫窝的地方，越要看第二眼。", "猫窝终于承认它今天藏了一只猫。", 42, { x: 438, y: 360, w: 226, h: 136, type: "nest" }),
+  makeCase("沙发底线", "沙发底部的阴影边缘，有一点不自然的圆。", "沙发底下传来轻轻呼噜。", 47, { x: 104, y: 382, w: 216, h: 108, type: "sofa" }),
+  makeCase("植物假证", "叶子很会挡视线，猫可能躲在花盆后面。", "植物后面露出灰耳朵。", 46, { x: 562, y: 324, w: 138, h: 162, type: "plant" }),
+  makeCase("地毯鼓包", "地毯边缘有一块弧度，像偷偷压着什么。", "地毯边缘出现了白色小爪。", 45, { x: 706, y: 392, w: 152, h: 86, type: "rug" }),
+  makeCase("柜门缝隙", "柜门没有完全合上，缝里有一点暖色反光。", "柜门缝里露出小鼻子。", 44, { x: 662, y: 204, w: 132, h: 152, type: "cabinet" }),
+  makeCase("灯下黑", "灯光越亮，旁边的阴影越值得怀疑。", "灯座旁边蹲着一团灰白。", 46, { x: 128, y: 204, w: 122, h: 152, type: "lamp" }),
+  makeCase("篮子轻响", "篮子明明空着，却像被压低了一点。", "篮子里多了一只猫猫。", 43, { x: 350, y: 414, w: 154, h: 76, type: "basket" }),
+  makeCase("枕头嫌疑", "枕头边角不够平整，像藏着圆圆的头。", "枕头后面有一双大眼睛。", 45, { x: 604, y: 340, w: 180, h: 104, type: "pillow" }),
+  makeCase("电视柜巡逻", "屏幕附近的黑色边缘，也许不全是家具。", "电视柜旁边发现猫猫巡逻员。", 44, { x: 38, y: 92, w: 172, h: 126, type: "screen" }),
+  makeCase("桌脚伏击", "桌脚旁边的阴影太厚，像有东西趴着。", "桌脚旁边伏击失败。", 43, { x: 760, y: 430, w: 120, h: 82, type: "table" }),
+  makeCase("床尾软垫", "床尾的软垫边缘有一点白色，别被布纹骗了。", "床尾软垫交出猫猫。", 46, { x: 92, y: 432, w: 178, h: 78, type: "blanket" }),
+];
+
+const decoyPool = [
+  { x: 602, y: 338, w: 176, h: 106, type: "pillow" },
+  { x: 778, y: 166, w: 92, h: 132, type: "box" },
+  { x: 440, y: 402, w: 130, h: 82, type: "rug" },
+  { x: 116, y: 348, w: 186, h: 100, type: "sofa" },
+  { x: 566, y: 392, w: 144, h: 82, type: "basket" },
+  { x: 382, y: 172, w: 160, h: 118, type: "window" },
+  { x: 338, y: 390, w: 150, h: 92, type: "plant" },
+  { x: 530, y: 210, w: 118, h: 140, type: "cabinet" },
+  { x: 118, y: 220, w: 120, h: 150, type: "lamp" },
+  { x: 724, y: 374, w: 128, h: 104, type: "box" },
 ];
 
 let photos = fallbackPhotos;
+let sessionCases = [];
 let levelIndex = 0;
 let found = 0;
-let remaining = cases[0].time;
+let remaining = 45;
 let focus = 100;
-let streak = 0;
-let globalFinds = 0;
 let isFound = false;
-let muted = false;
 let hintLevel = 0;
 let timerId = null;
 let toastId = null;
-let pulse = 0;
 let mouse = { x: 480, y: 320, active: false };
+let audio = null;
+let musicOn = false;
+let musicTimer = null;
+
+function makeCase(name, clue, reward, time, target) {
+  return {
+    name,
+    clue,
+    reward,
+    time,
+    target,
+    hint: [
+      "先看家具边缘，不要急着点。",
+      "目标附近会有固定的小线索。",
+      "现在出现的金色眼睛或白色爪印就是最后提示。",
+    ],
+  };
+}
+
+function shuffle(items) {
+  return [...items].sort(() => Math.random() - 0.5);
+}
+
+function pickSessionCases() {
+  sessionCases = shuffle(allCases).slice(0, 5).map((item) => {
+    const decoys = shuffle(decoyPool)
+      .filter((decoy) => !overlaps(decoy, item.target))
+      .slice(0, 4);
+    return { ...item, decoys };
+  });
+}
+
+function overlaps(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
 
 function pixelRect(x, y, w, h, color) {
   ctx.fillStyle = color;
@@ -153,99 +144,28 @@ async function loadPhotos() {
     const response = await fetch("api/photos");
     if (!response.ok) return;
     const data = await response.json();
-    if (Array.isArray(data.photos) && data.photos.length) {
-      photos = data.photos;
-    }
+    if (Array.isArray(data.photos) && data.photos.length) photos = data.photos;
   } catch {
     photos = fallbackPhotos;
-  }
-  renderPhotoStrip();
-  updateCasePanel();
-}
-
-async function loadStats() {
-  try {
-    const response = await fetch("api/stats");
-    if (!response.ok) return;
-    const stats = await response.json();
-    globalFinds = Number(stats.totalFinds || 0);
-    updateHud();
-  } catch {
-    globalText.textContent = "-";
   }
 }
 
 async function recordFind(levelName) {
   try {
-    const response = await fetch("api/find", {
+    await fetch("api/find", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ level: levelName }),
     });
-    if (!response.ok) return;
-    const stats = await response.json();
-    globalFinds = Number(stats.totalFinds || 0);
-    updateHud();
   } catch {
-    globalText.textContent = "-";
+    // The game works offline; stats are optional.
   }
-}
-
-function renderPhotoStrip() {
-  photoStrip.innerHTML = "";
-  photos.slice(0, 12).forEach((src, index) => {
-    const img = document.createElement("img");
-    img.src = src;
-    img.alt = `猫猫照片 ${index + 1}`;
-    if (index === levelIndex % photos.length) img.classList.add("active");
-    photoStrip.appendChild(img);
-  });
-}
-
-function renderGallery() {
-  galleryGrid.innerHTML = "";
-  photos.forEach((src, index) => {
-    const figure = document.createElement("figure");
-    const img = document.createElement("img");
-    const caption = document.createElement("figcaption");
-    img.src = src;
-    img.alt = `猫猫奖励照片 ${index + 1}`;
-    caption.textContent = `No. ${String(index + 1).padStart(2, "0")}`;
-    figure.append(img, caption);
-    galleryGrid.appendChild(figure);
-  });
-}
-
-function showFinalGallery() {
-  renderGallery();
-  finalGallery.classList.add("show");
-  finalGallery.setAttribute("aria-hidden", "false");
-}
-
-function hideFinalGallery() {
-  finalGallery.classList.remove("show");
-  finalGallery.setAttribute("aria-hidden", "true");
-}
-
-function updateCasePanel() {
-  const current = cases[levelIndex];
-  caseLabel.textContent = `Case ${String(levelIndex + 1).padStart(2, "0")}`;
-  caseTitle.textContent = current.name;
-  caseClue.textContent = current.clue;
-
-  Array.from(photoStrip.children).forEach((img, index) => {
-    img.classList.toggle("active", index === levelIndex % photos.length);
-  });
 }
 
 function drawRoom() {
   pixelRect(0, 0, 960, 640, palette.wall);
-  for (let y = 26; y < 330; y += 30) {
-    pixelRect(0, y, 960, 4, y % 60 === 26 ? palette.wallDark : "#60705f");
-  }
-  for (let x = 48; x < 920; x += 96) {
-    pixelRect(x, 0, 5, 330, "rgba(35, 42, 36, 0.34)");
-  }
+  for (let y = 26; y < 330; y += 30) pixelRect(0, y, 960, 4, y % 60 === 26 ? palette.wallDark : "#60705f");
+  for (let x = 48; x < 920; x += 96) pixelRect(x, 0, 5, 330, "rgba(35, 42, 36, 0.34)");
 
   pixelRect(0, 330, 960, 310, palette.floor);
   for (let y = 348; y < 640; y += 34) {
@@ -255,10 +175,7 @@ function drawRoom() {
     }
   }
 
-  pixelRect(36, 92, 172, 126, "#384139");
-  pixelRect(50, 106, 144, 90, "#151c1d");
-  pixelRect(82, 132, 24, 24, palette.gold);
-  pixelRect(122, 154, 44, 9, palette.blue);
+  drawObject({ x: 38, y: 92, w: 172, h: 126, type: "screen" }, false);
   pixelRect(36, 522, 888, 22, "#252b23");
   pixelRect(70, 544, 44, 58, "#131711");
   pixelRect(846, 544, 44, 58, "#131711");
@@ -334,13 +251,17 @@ function drawObject(area, isTarget) {
     pixelRect(x, y + 64, w, h - 58, "#9c7954");
     pixelRect(x + 48, y + 24, w - 96, 56, "#d5b06d");
   }
-
-  if (isTarget && hintLevel > 0 && !isFound) {
-    drawSubtleClue(area);
+  if (type === "screen") {
+    pixelRect(x, y, w, h, "#384139");
+    pixelRect(x + 14, y + 14, w - 28, h - 36, "#151c1d");
+    pixelRect(x + 44, y + 40, 24, 24, palette.gold);
+    pixelRect(x + 84, y + 62, 44, 9, palette.blue);
   }
+
+  if (isTarget && hintLevel > 0 && !isFound) drawClue(area);
 }
 
-function drawSubtleClue(area) {
+function drawClue(area) {
   if (hintLevel >= 1) {
     pixelRect(area.x + area.w - 42, area.y + 34, 8, 8, "#d69b46");
     pixelRect(area.x + area.w - 25, area.y + 34, 5, 8, palette.ink);
@@ -351,7 +272,7 @@ function drawSubtleClue(area) {
   }
 }
 
-function drawHiddenCat(area) {
+function drawCat(area) {
   if (!isFound) return;
   const x = area.x + Math.round(area.w * 0.46);
   const y = area.y + Math.round(area.h * 0.32);
@@ -371,24 +292,24 @@ function drawScanner() {
   if (!mouse.active || isFound) return;
   const size = 72;
   ctx.save();
-  ctx.globalAlpha = 0.16;
+  ctx.globalAlpha = 0.12;
   ctx.fillStyle = palette.green;
   ctx.fillRect(mouse.x - size / 2, mouse.y - size / 2, size, size);
-  ctx.globalAlpha = 0.6;
+  ctx.globalAlpha = 0.48;
   ctx.strokeStyle = palette.green;
   ctx.lineWidth = 3;
-  ctx.strokeRect(Math.round(mouse.x - size / 2), Math.round(mouse.y - size / 2), Math.round(size), Math.round(size));
+  ctx.strokeRect(Math.round(mouse.x - size / 2), Math.round(mouse.y - size / 2), size, size);
   ctx.restore();
 }
 
 function render() {
-  const current = cases[levelIndex];
+  const current = sessionCases[levelIndex];
+  if (!current) return requestAnimationFrame(render);
   drawRoom();
   current.decoys.forEach((item) => drawObject(item, false));
   drawObject(current.target, true);
-  drawHiddenCat(current.target);
+  drawCat(current.target);
   drawScanner();
-  pulse += 1;
   requestAnimationFrame(render);
 }
 
@@ -411,69 +332,50 @@ function setToast(text) {
   toastId = setTimeout(() => toast.classList.remove("show"), 1800);
 }
 
-function chirp(success = false) {
-  if (muted) return;
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContext) return;
-  const audio = new AudioContext();
-  const osc = audio.createOscillator();
-  const gain = audio.createGain();
-  osc.type = "square";
-  osc.frequency.value = success ? 820 : 210;
-  gain.gain.setValueAtTime(0.045, audio.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.14);
-  osc.connect(gain).connect(audio.destination);
-  osc.start();
-  osc.stop(audio.currentTime + 0.15);
-}
-
 function updateHud() {
-  levelText.textContent = `${levelIndex + 1} / ${cases.length}`;
+  levelText.textContent = `${levelIndex + 1} / ${sessionCases.length}`;
   timeText.textContent = String(Math.max(0, remaining));
   scoreText.textContent = String(found);
-  globalText.textContent = String(globalFinds);
   focusText.textContent = String(Math.max(0, focus));
-  streakText.textContent = String(streak);
 }
 
 function revealCat(auto = false) {
   if (isFound) return;
-  const current = cases[levelIndex];
+  const current = sessionCases[levelIndex];
   isFound = true;
   found += 1;
-  streak = auto ? 0 : streak + 1;
-  foundImage.src = choosePhoto(levelIndex + 1);
-  foundTitle.textContent = `${current.name} 结案`;
+  foundImage.src = choosePhoto(levelIndex + found);
+  foundTitle.textContent = `${current.name} 找到啦`;
   foundNote.textContent = current.reward;
   foundCard.classList.add("show");
   foundCard.setAttribute("aria-hidden", "false");
   nextButton.disabled = false;
-  nextButton.textContent = levelIndex === cases.length - 1 ? "照片奖励" : "下一案";
-  setToast(auto ? "时间到，猫猫自己露面了。" : "结案。猫猫照片已入档。");
-  chirp(true);
+  nextButton.textContent = levelIndex === sessionCases.length - 1 ? "照片奖励" : "下一关";
+  setToast(auto ? "时间到，猫猫自己露面了。" : "找到猫猫。");
+  beep(true);
   updateHud();
   recordFind(current.name);
 }
 
 function wrongGuess(area) {
   const labels = {
-    blanket: "布料皱褶，暂未发现猫。",
+    blanket: "只是布料皱褶。",
     pillow: "枕头过于无辜。",
-    box: "纸箱空置。",
-    sofa: "沙发阴影干扰判断。",
+    box: "纸箱暂时空着。",
+    sofa: "沙发阴影误导了你。",
     plant: "植物保持沉默。",
     rug: "毯子没有呼噜声。",
     cabinet: "柜门线索不成立。",
-    lamp: "灯光太亮，猫不在这里。",
+    lamp: "灯下没有猫。",
     basket: "篮子里只有空气。",
     window: "窗户反光误导了你。",
-    table: "桌下没有目标。",
-    nest: "猫窝伪装失败，但这里不是。",
+    table: "桌下不是这里。",
+    nest: "猫窝这次没藏猫。",
+    screen: "屏幕旁边没有猫。",
   };
-  focus = Math.max(0, focus - 12);
-  streak = 0;
+  focus = Math.max(0, focus - 10);
   setToast(labels[area.type] || "线索不成立。");
-  chirp(false);
+  beep(false);
   updateHud();
 }
 
@@ -492,19 +394,108 @@ function startTimer() {
 
 function loadLevel(index) {
   levelIndex = index;
-  remaining = cases[levelIndex].time;
+  const current = sessionCases[levelIndex];
+  remaining = current.time;
   focus = 100;
   hintLevel = 0;
   isFound = false;
   nextButton.disabled = true;
-  nextButton.textContent = "下一案";
+  nextButton.textContent = "下一关";
   foundCard.classList.remove("show");
   foundCard.setAttribute("aria-hidden", "true");
   hideFinalGallery();
-  updateCasePanel();
+  caseLabel.textContent = `Case ${String(levelIndex + 1).padStart(2, "0")}`;
+  caseTitle.textContent = current.name;
+  caseClue.textContent = current.clue;
   updateHud();
-  setToast(cases[levelIndex].name);
+  setToast(current.name);
   startTimer();
+}
+
+function newGame() {
+  pickSessionCases();
+  found = 0;
+  loadLevel(0);
+}
+
+function renderGallery() {
+  galleryGrid.innerHTML = "";
+  photos.forEach((src, index) => {
+    const figure = document.createElement("figure");
+    const img = document.createElement("img");
+    const caption = document.createElement("figcaption");
+    img.src = src;
+    img.alt = `猫猫奖励照片 ${index + 1}`;
+    caption.textContent = `No. ${String(index + 1).padStart(2, "0")}`;
+    figure.append(img, caption);
+    galleryGrid.appendChild(figure);
+  });
+}
+
+function showFinalGallery() {
+  renderGallery();
+  finalGallery.classList.add("show");
+  finalGallery.setAttribute("aria-hidden", "false");
+}
+
+function hideFinalGallery() {
+  finalGallery.classList.remove("show");
+  finalGallery.setAttribute("aria-hidden", "true");
+}
+
+function ensureAudio() {
+  if (audio) return;
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return;
+  const context = new AudioContext();
+  const master = context.createGain();
+  master.gain.value = 0.035;
+  master.connect(context.destination);
+  audio = { context, master, step: 0 };
+}
+
+function playTone(freq, start, duration, gainValue = 0.25) {
+  if (!audio) return;
+  const osc = audio.context.createOscillator();
+  const gain = audio.context.createGain();
+  osc.type = "triangle";
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, start);
+  gain.gain.linearRampToValueAtTime(gainValue, start + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+  osc.connect(gain).connect(audio.master);
+  osc.start(start);
+  osc.stop(start + duration + 0.02);
+}
+
+function musicTick() {
+  if (!audio || !musicOn) return;
+  const now = audio.context.currentTime;
+  const melody = [392, 523, 587, 659, 587, 523, 440, 494];
+  const bass = [196, 196, 220, 247];
+  playTone(melody[audio.step % melody.length], now, 0.22, 0.18);
+  if (audio.step % 2 === 0) playTone(bass[(audio.step / 2) % bass.length], now, 0.32, 0.14);
+  audio.step += 1;
+}
+
+function toggleMusic(forceOn = false) {
+  ensureAudio();
+  if (!audio) return;
+  if (audio.context.state === "suspended") audio.context.resume();
+  musicOn = forceOn ? true : !musicOn;
+  musicButton.textContent = musicOn ? "♫" : "♪";
+  clearInterval(musicTimer);
+  if (musicOn) {
+    musicTick();
+    musicTimer = setInterval(musicTick, 360);
+  }
+}
+
+function beep(success) {
+  ensureAudio();
+  if (!audio) return;
+  if (audio.context.state === "suspended") audio.context.resume();
+  playTone(success ? 880 : 220, audio.context.currentTime, 0.12, 0.32);
 }
 
 canvas.addEventListener("mousemove", (event) => {
@@ -516,29 +507,24 @@ canvas.addEventListener("mouseleave", () => {
 });
 
 canvas.addEventListener("click", (event) => {
+  if (!musicOn) toggleMusic(true);
   if (isFound) return;
-  const current = cases[levelIndex];
+  const current = sessionCases[levelIndex];
   const point = canvasPoint(event);
-  if (within(point, current.target)) {
-    revealCat(false);
-    return;
-  }
+  if (within(point, current.target)) return revealCat(false);
   const wrong = current.decoys.find((item) => within(point, item));
-  if (wrong) {
-    wrongGuess(wrong);
-    return;
-  }
-  focus = Math.max(0, focus - 5);
-  setToast("空白区域，没有有效线索。");
-  chirp(false);
+  if (wrong) return wrongGuess(wrong);
+  focus = Math.max(0, focus - 4);
+  setToast("这里没有猫猫。");
+  beep(false);
   updateHud();
 });
 
 hintButton.addEventListener("click", () => {
-  const current = cases[levelIndex];
-  const hints = current.hint;
-  const text = hints[Math.min(hintLevel, hints.length - 1)];
-  hintLevel = Math.min(hintLevel + 1, hints.length);
+  if (!musicOn) toggleMusic(true);
+  const current = sessionCases[levelIndex];
+  const text = current.hint[Math.min(hintLevel, current.hint.length - 1)];
+  hintLevel = Math.min(hintLevel + 1, current.hint.length);
   focus = Math.max(10, focus - 8);
   remaining = Math.max(8, remaining - 4);
   setToast(text);
@@ -546,8 +532,8 @@ hintButton.addEventListener("click", () => {
 });
 
 nextButton.addEventListener("click", () => {
-  if (levelIndex === cases.length - 1) {
-    setToast(`全部结案：找到 ${found} 次猫猫。`);
+  if (levelIndex === sessionCases.length - 1) {
+    setToast(`通关：找到 ${found} 次猫猫。`);
     showFinalGallery();
     nextButton.disabled = true;
     return;
@@ -555,22 +541,11 @@ nextButton.addEventListener("click", () => {
   loadLevel(levelIndex + 1);
 });
 
-resetButton.addEventListener("click", () => {
-  found = 0;
-  streak = 0;
-  hideFinalGallery();
-  loadLevel(0);
-});
-
+resetButton.addEventListener("click", newGame);
+musicButton.addEventListener("click", () => toggleMusic(false));
 closeGalleryButton.addEventListener("click", hideFinalGallery);
 
-soundButton.addEventListener("click", () => {
-  muted = !muted;
-  soundButton.textContent = muted ? "×" : "♪";
-  setToast(muted ? "静音" : "声音打开");
-});
-
-loadStats();
 loadPhotos();
+pickSessionCases();
 loadLevel(0);
 render();
