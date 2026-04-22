@@ -14,8 +14,16 @@ const caseLabel = document.querySelector("#caseLabel");
 const caseTitle = document.querySelector("#caseTitle");
 const caseClue = document.querySelector("#caseClue");
 const finalGallery = document.querySelector("#finalGallery");
-const galleryGrid = document.querySelector("#galleryGrid");
 const closeGalleryButton = document.querySelector("#closeGalleryButton");
+const slideImage = document.querySelector("#slideImage");
+const slideCaption = document.querySelector("#slideCaption");
+const prevSlideButton = document.querySelector("#prevSlideButton");
+const nextSlideButton = document.querySelector("#nextSlideButton");
+const photoModal = document.querySelector("#photoModal");
+const photoModalImage = document.querySelector("#photoModalImage");
+const roundPhotoButton = document.querySelector("#roundPhotoButton");
+const roundPhotoThumb = document.querySelector("#roundPhotoThumb");
+const closePhotoButton = document.querySelector("#closePhotoButton");
 const hintButton = document.querySelector("#hintButton");
 const nextButton = document.querySelector("#nextButton");
 const resetButton = document.querySelector("#resetButton");
@@ -97,6 +105,8 @@ let mouse = { x: 480, y: 320, active: false };
 let audio = null;
 let musicOn = false;
 let musicTimer = null;
+let slideIndex = 0;
+let slideTimer = null;
 
 function makeCase(name, clue, reward, time, target) {
   return {
@@ -121,7 +131,7 @@ function pickSessionCases() {
   sessionCases = shuffle(allCases).slice(0, 5).map((item) => {
     const decoys = shuffle(decoyPool)
       .filter((decoy) => !overlaps(decoy, item.target))
-      .slice(0, 4);
+      .slice(0, 7);
     return { ...item, decoys };
   });
 }
@@ -145,6 +155,10 @@ async function loadPhotos() {
     if (!response.ok) return;
     const data = await response.json();
     if (Array.isArray(data.photos) && data.photos.length) photos = data.photos;
+    if (sessionCases.length) {
+      roundPhotoThumb.src = currentPhoto();
+      roundPhotoThumb.alt = `${sessionCases[levelIndex].name} 的猫猫照片`;
+    }
   } catch {
     photos = fallbackPhotos;
   }
@@ -176,9 +190,21 @@ function drawRoom() {
   }
 
   drawObject({ x: 38, y: 92, w: 172, h: 126, type: "screen" }, false);
+  drawDecorations();
   pixelRect(36, 522, 888, 22, "#252b23");
   pixelRect(70, 544, 44, 58, "#131711");
   pixelRect(846, 544, 44, 58, "#131711");
+}
+
+function drawDecorations() {
+  drawObject({ x: 256, y: 104, w: 132, h: 96, type: "shelf" }, false);
+  drawObject({ x: 410, y: 96, w: 96, h: 122, type: "plant" }, false);
+  drawObject({ x: 560, y: 122, w: 126, h: 82, type: "frame" }, false);
+  drawObject({ x: 720, y: 98, w: 104, h: 120, type: "cabinet" }, false);
+  drawObject({ x: 266, y: 286, w: 120, h: 80, type: "toy" }, false);
+  drawObject({ x: 74, y: 286, w: 112, h: 80, type: "food" }, false);
+  drawObject({ x: 826, y: 304, w: 74, h: 92, type: "scratcher" }, false);
+  drawObject({ x: 516, y: 300, w: 112, h: 70, type: "bookpile" }, false);
 }
 
 function drawObject(area, isTarget) {
@@ -257,6 +283,43 @@ function drawObject(area, isTarget) {
     pixelRect(x + 44, y + 40, 24, 24, palette.gold);
     pixelRect(x + 84, y + 62, 44, 9, palette.blue);
   }
+  if (type === "shelf") {
+    pixelRect(x, y + 16, w, h - 20, "#6a5138");
+    pixelRect(x + 10, y + 32, w - 20, 8, "#3d2c21");
+    pixelRect(x + 10, y + 62, w - 20, 8, "#3d2c21");
+    pixelRect(x + 20, y + 4, 20, 30, "#d79b55");
+    pixelRect(x + 48, y + 6, 16, 28, "#9acb76");
+    pixelRect(x + 78, y + 10, 34, 22, "#6fa4c9");
+  }
+  if (type === "frame") {
+    pixelRect(x, y, w, h, "#33413c");
+    pixelRect(x + 10, y + 10, w - 20, h - 20, "#202a27");
+    pixelRect(x + 24, y + 26, 28, 28, "#efb85b");
+    pixelRect(x + 60, y + 42, 44, 10, "#8bd46f");
+  }
+  if (type === "toy") {
+    pixelRect(x + 16, y + 38, 46, 24, "#d56d62");
+    pixelRect(x + 56, y + 30, 28, 28, "#efb85b");
+    pixelRect(x + 88, y + 42, 18, 18, "#73b7ff");
+    pixelRect(x + 34, y + 18, 12, 26, "#f3eddc");
+  }
+  if (type === "food") {
+    pixelRect(x + 10, y + 42, 46, 20, "#b7824f");
+    pixelRect(x + 64, y + 42, 42, 20, "#d7d0bb");
+    pixelRect(x + 22, y + 32, 20, 10, "#efb85b");
+    pixelRect(x + 74, y + 32, 20, 10, "#8bd46f");
+  }
+  if (type === "scratcher") {
+    pixelRect(x + 20, y + 10, 34, h - 20, "#b98a59");
+    for (let yLine = y + 20; yLine < y + h - 12; yLine += 12) pixelRect(x + 16, yLine, 42, 4, "#755136");
+    pixelRect(x + 4, y + h - 16, w - 8, 16, "#6d5a46");
+  }
+  if (type === "bookpile") {
+    pixelRect(x + 8, y + 42, 92, 12, "#6fa4c9");
+    pixelRect(x + 18, y + 28, 78, 12, "#d56d62");
+    pixelRect(x + 30, y + 14, 62, 12, "#efb85b");
+    pixelRect(x + 74, y + 2, 24, 18, "#9acb76");
+  }
 
   if (isTarget && hintLevel > 0 && !isFound) drawClue(area);
 }
@@ -313,6 +376,10 @@ function render() {
   requestAnimationFrame(render);
 }
 
+function currentPhoto() {
+  return choosePhoto(levelIndex);
+}
+
 function canvasPoint(event) {
   const rect = canvas.getBoundingClientRect();
   return {
@@ -344,7 +411,7 @@ function revealCat(auto = false) {
   const current = sessionCases[levelIndex];
   isFound = true;
   found += 1;
-  foundImage.src = choosePhoto(levelIndex + found);
+  foundImage.src = currentPhoto();
   foundTitle.textContent = `${current.name} 找到啦`;
   foundNote.textContent = current.reward;
   foundCard.classList.add("show");
@@ -407,6 +474,8 @@ function loadLevel(index) {
   caseLabel.textContent = `Case ${String(levelIndex + 1).padStart(2, "0")}`;
   caseTitle.textContent = current.name;
   caseClue.textContent = current.clue;
+  roundPhotoThumb.src = currentPhoto();
+  roundPhotoThumb.alt = `${current.name} 的猫猫照片`;
   updateHud();
   setToast(current.name);
   startTimer();
@@ -418,29 +487,42 @@ function newGame() {
   loadLevel(0);
 }
 
-function renderGallery() {
-  galleryGrid.innerHTML = "";
-  photos.forEach((src, index) => {
-    const figure = document.createElement("figure");
-    const img = document.createElement("img");
-    const caption = document.createElement("figcaption");
-    img.src = src;
-    img.alt = `猫猫奖励照片 ${index + 1}`;
-    caption.textContent = `No. ${String(index + 1).padStart(2, "0")}`;
-    figure.append(img, caption);
-    galleryGrid.appendChild(figure);
-  });
+function renderSlide() {
+  const src = photos[slideIndex % photos.length] || fallbackPhotos[0];
+  slideImage.src = src;
+  slideCaption.textContent = `No. ${String(slideIndex + 1).padStart(2, "0")} / ${photos.length}`;
+}
+
+function nextSlide(step = 1) {
+  slideIndex = (slideIndex + step + photos.length) % photos.length;
+  renderSlide();
 }
 
 function showFinalGallery() {
-  renderGallery();
+  slideIndex = 0;
+  renderSlide();
   finalGallery.classList.add("show");
   finalGallery.setAttribute("aria-hidden", "false");
+  rewardFanfare();
+  clearInterval(slideTimer);
+  slideTimer = setInterval(() => nextSlide(1), 2200);
 }
 
 function hideFinalGallery() {
   finalGallery.classList.remove("show");
   finalGallery.setAttribute("aria-hidden", "true");
+  clearInterval(slideTimer);
+}
+
+function showRoundPhoto() {
+  photoModalImage.src = currentPhoto();
+  photoModal.classList.add("show");
+  photoModal.setAttribute("aria-hidden", "false");
+}
+
+function hideRoundPhoto() {
+  photoModal.classList.remove("show");
+  photoModal.setAttribute("aria-hidden", "true");
 }
 
 function ensureAudio() {
@@ -498,6 +580,14 @@ function beep(success) {
   playTone(success ? 880 : 220, audio.context.currentTime, 0.12, 0.32);
 }
 
+function rewardFanfare() {
+  ensureAudio();
+  if (!audio) return;
+  if (audio.context.state === "suspended") audio.context.resume();
+  const now = audio.context.currentTime;
+  [523, 659, 784, 1046].forEach((freq, index) => playTone(freq, now + index * 0.11, 0.22, 0.26));
+}
+
 canvas.addEventListener("mousemove", (event) => {
   mouse = { ...canvasPoint(event), active: true };
 });
@@ -544,6 +634,13 @@ nextButton.addEventListener("click", () => {
 resetButton.addEventListener("click", newGame);
 musicButton.addEventListener("click", () => toggleMusic(false));
 closeGalleryButton.addEventListener("click", hideFinalGallery);
+prevSlideButton.addEventListener("click", () => nextSlide(-1));
+nextSlideButton.addEventListener("click", () => nextSlide(1));
+roundPhotoButton.addEventListener("click", showRoundPhoto);
+closePhotoButton.addEventListener("click", hideRoundPhoto);
+photoModal.addEventListener("click", (event) => {
+  if (event.target === photoModal) hideRoundPhoto();
+});
 
 loadPhotos();
 pickSessionCases();

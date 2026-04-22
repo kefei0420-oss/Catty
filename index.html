@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Catty - 找猫猫</title>
-    <link rel="stylesheet" href="styles.css?v=20260422-1534">
+    <link rel="stylesheet" href="styles.css?v=20260422-1546">
   </head>
   <body>
     <main class="game-shell">
@@ -45,6 +45,9 @@
             <strong id="caseTitle">读取猫猫地点中</strong>
             <p id="caseClue">请观察房间里的家具、阴影和反光。</p>
           </div>
+          <button id="roundPhotoButton" class="round-photo" type="button" aria-label="查看本关猫猫照片" title="查看本关猫猫照片">
+            <img id="roundPhotoThumb" src="" alt="本关猫猫照片">
+          </button>
         </div>
 
         <div class="stage-wrap">
@@ -70,15 +73,29 @@
           <div class="gallery-head">
             <div>
               <span>Reward</span>
-              <h2>全部猫猫照片</h2>
+              <h2>猫猫幻灯片</h2>
             </div>
             <button id="closeGalleryButton" class="icon-button" type="button" aria-label="关闭照片墙" title="关闭">×</button>
           </div>
-          <div id="galleryGrid" class="gallery-grid"></div>
+          <div class="slide-stage">
+            <button id="prevSlideButton" class="slide-button" type="button" aria-label="上一张">‹</button>
+            <figure>
+              <img id="slideImage" src="" alt="猫猫奖励幻灯片">
+              <figcaption id="slideCaption">No. 01</figcaption>
+            </figure>
+            <button id="nextSlideButton" class="slide-button" type="button" aria-label="下一张">›</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="photoModal" class="photo-modal" aria-hidden="true" aria-label="本关猫猫照片">
+        <div class="photo-viewer">
+          <button id="closePhotoButton" class="icon-button" type="button" aria-label="关闭照片" title="关闭">×</button>
+          <img id="photoModalImage" src="" alt="本关猫猫大图">
         </div>
       </section>
     </main>
 
-    <script src="game.js?v=20260422-1534"></script>
+    <script src="game.js?v=20260422-1546"></script>
   </body>
 </html>
