@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Catty - 找猫猫</title>
-    <link rel="stylesheet" href="styles.css?v=20260423-001">
+    <link rel="stylesheet" href="styles.css?v=20260423-003">
   </head>
   <body>
     <main class="game-shell">
@@ -36,6 +36,7 @@
             <strong id="focusText">100</strong>
           </div>
           <button id="musicButton" class="icon-button" type="button" aria-label="音乐" title="音乐">♪</button>
+          <button id="codexButton" class="icon-button" type="button" aria-label="图鉴" title="图鉴">▦</button>
           <button id="resetButton" class="icon-button" type="button" aria-label="重开" title="重开">↻</button>
         </div>
 
@@ -94,8 +95,32 @@
           <img id="photoModalImage" src="" alt="本关猫猫大图">
         </div>
       </section>
+
+      <section id="pieceRewardModal" class="photo-modal" aria-hidden="true" aria-label="猫猫拼图奖励">
+        <div class="piece-reward-panel">
+          <button id="closePieceRewardButton" class="icon-button" type="button" aria-label="关闭奖励" title="关闭">×</button>
+          <span>New piece</span>
+          <h2>获得一片猫猫拼图</h2>
+          <div id="rewardPiecePreview" class="piece-preview"></div>
+          <p id="rewardPieceText">已加入你的猫猫图鉴。</p>
+          <button id="openCodexFromRewardButton" class="primary-button" type="button">查看图鉴</button>
+        </div>
+      </section>
+
+      <section id="codexModal" class="gallery-modal" aria-hidden="true" aria-label="猫猫拼图图鉴">
+        <div class="codex-panel">
+          <div class="gallery-head">
+            <div>
+              <span id="playerIdText">Player</span>
+              <h2>猫猫拼图图鉴</h2>
+            </div>
+            <button id="closeCodexButton" class="icon-button" type="button" aria-label="关闭图鉴" title="关闭">×</button>
+          </div>
+          <div id="codexGrid" class="codex-grid"></div>
+        </div>
+      </section>
     </main>
 
-    <script src="game.js?v=20260423-001"></script>
+    <script src="game.js?v=20260423-003"></script>
   </body>
 </html>

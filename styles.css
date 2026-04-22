@@ -455,6 +455,129 @@ canvas {
   background: #0d110c;
 }
 
+.piece-reward-panel {
+  position: relative;
+  width: min(460px, 100%);
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  background: #182017;
+  border: 1px solid rgba(239, 184, 91, 0.5);
+  border-radius: 8px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.46);
+}
+
+.piece-reward-panel .icon-button {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  margin-left: 0;
+  background: rgba(18, 24, 17, 0.88);
+}
+
+.piece-reward-panel > span {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.piece-reward-panel h2 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.piece-reward-panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.piece-preview {
+  width: min(100%, 240px);
+  aspect-ratio: 1;
+  justify-self: center;
+  border: 1px solid rgba(239, 184, 91, 0.56);
+  border-radius: 8px;
+  background-color: #0f140d;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 1px rgba(226, 237, 212, 0.08);
+}
+
+.piece-reward-panel .primary-button {
+  justify-self: end;
+}
+
+.codex-panel {
+  width: min(1040px, 100%);
+  max-height: min(780px, calc(100vh - 48px));
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  background: #182017;
+  border: 1px solid rgba(239, 184, 91, 0.5);
+  border-radius: 8px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.46);
+}
+
+.codex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(186px, 1fr));
+  gap: 14px;
+  padding: 16px;
+  overflow: auto;
+}
+
+.codex-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(12, 16, 11, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.puzzle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  aspect-ratio: 1;
+}
+
+.puzzle-cell {
+  border-radius: 4px;
+  background: linear-gradient(135deg, #2a3127, #20271d);
+  border: 1px solid rgba(226, 237, 212, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(226, 237, 212, 0.03);
+}
+
+.puzzle-cell.owned {
+  background-color: #0f140d;
+  background-repeat: no-repeat;
+}
+
+.codex-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.codex-meta strong {
+  font-size: 15px;
+  font-weight: 760;
+}
+
+.codex-meta span {
+  color: var(--gold);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 @media (max-width: 760px) {
   .game-shell {
     width: min(100vw - 18px, 680px);
@@ -510,6 +633,21 @@ canvas {
     height: 58px;
     font-size: 28px;
   }
+
+  .piece-reward-panel {
+    width: min(100%, 380px);
+    padding: 16px;
+  }
+
+  .piece-reward-panel h2 {
+    font-size: 24px;
+  }
+
+  .codex-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 12px;
+  }
 }
 
 @media (max-width: 520px) {
@@ -556,5 +694,27 @@ canvas {
   .found-card img {
     width: 84px;
     height: 72px;
+  }
+
+  .piece-reward-panel {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .piece-preview {
+    width: min(100%, 200px);
+  }
+
+  .piece-reward-panel .primary-button {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .codex-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .codex-meta {
+    align-items: center;
   }
 }

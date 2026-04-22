@@ -28,6 +28,16 @@ const hintButton = document.querySelector("#hintButton");
 const nextButton = document.querySelector("#nextButton");
 const resetButton = document.querySelector("#resetButton");
 const musicButton = document.querySelector("#musicButton");
+const codexButton = document.querySelector("#codexButton");
+const pieceRewardModal = document.querySelector("#pieceRewardModal");
+const closePieceRewardButton = document.querySelector("#closePieceRewardButton");
+const openCodexFromRewardButton = document.querySelector("#openCodexFromRewardButton");
+const rewardPiecePreview = document.querySelector("#rewardPiecePreview");
+const rewardPieceText = document.querySelector("#rewardPieceText");
+const codexModal = document.querySelector("#codexModal");
+const closeCodexButton = document.querySelector("#closeCodexButton");
+const codexGrid = document.querySelector("#codexGrid");
+const playerIdText = document.querySelector("#playerIdText");
 
 const palette = {
   wall: "#52614f",
@@ -59,6 +69,10 @@ const fallbackPhotos = [
   "assets/20260422-225112.jpeg",
   "assets/20260422-225115.jpeg",
 ];
+
+const PUZZLE_GRID = 3;
+const PUZZLE_PIECES = PUZZLE_GRID * PUZZLE_GRID;
+const PROFILE_KEY = "catty-puzzle-profile-v1";
 
 const allCases = [
   makeCase("床边潜伏", "白色前爪、灰色耳朵，通常贴着软软的布料边缘。", "白爪爪从被边露出来了。", 50, { x: 146, y: 396, w: 182, h: 94, type: "blanket" }),
@@ -123,6 +137,9 @@ let musicOn = false;
 let musicTimer = null;
 let slideIndex = 0;
 let slideTimer = null;
+let rewardGranted = false;
+let profile = loadProfile();
+saveProfile();
 
 function makeCase(name, clue, reward, time, target) {
   return {
@@ -170,6 +187,52 @@ function pixelRect(x, y, w, h, color) {
 
 function choosePhoto(index) {
   return photos[index % photos.length] || fallbackPhotos[0];
+}
+
+function loadProfile() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(PROFILE_KEY));
+    if (stored && stored.playerId && stored.collection) return stored;
+  } catch {
+    // Fall through and create a fresh local player.
+  }
+  const playerId = `CAT-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Date.now().toString(36).slice(-4).toUpperCase()}`;
+  return { playerId, collection: {} };
+}
+
+function saveProfile() {
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+}
+
+function getPieces(photo) {
+  return Array.isArray(profile.collection[photo]) ? profile.collection[photo] : [];
+}
+
+function hasPiece(photo, piece) {
+  return getPieces(photo).includes(piece);
+}
+
+function addPiece(photo, piece) {
+  const pieces = new Set(getPieces(photo));
+  pieces.add(piece);
+  profile.collection[photo] = Array.from(pieces).sort((a, b) => a - b);
+  saveProfile();
+}
+
+function piecePosition(piece) {
+  const col = piece % PUZZLE_GRID;
+  const row = Math.floor(piece / PUZZLE_GRID);
+  return {
+    x: col === 0 ? "0%" : col === 1 ? "50%" : "100%",
+    y: row === 0 ? "0%" : row === 1 ? "50%" : "100%",
+  };
+}
+
+function stylePiece(element, photo, piece) {
+  const pos = piecePosition(piece);
+  element.style.backgroundImage = `url("${photo}")`;
+  element.style.backgroundSize = `${PUZZLE_GRID * 100}% ${PUZZLE_GRID * 100}%`;
+  element.style.backgroundPosition = `${pos.x} ${pos.y}`;
 }
 
 async function loadPhotos() {
@@ -499,6 +562,7 @@ function loadLevel(index) {
 function newGame() {
   pickSessionCases();
   found = 0;
+  rewardGranted = false;
   loadLevel(0);
 }
 
@@ -519,6 +583,10 @@ function showFinalGallery() {
   finalGallery.classList.add("show");
   finalGallery.setAttribute("aria-hidden", "false");
   rewardFanfare();
+  if (!rewardGranted) {
+    rewardGranted = true;
+    grantPuzzlePiece();
+  }
   clearInterval(slideTimer);
   slideTimer = setInterval(() => nextSlide(1), 2200);
 }
@@ -538,6 +606,82 @@ function showRoundPhoto() {
 function hideRoundPhoto() {
   photoModal.classList.remove("show");
   photoModal.setAttribute("aria-hidden", "true");
+}
+
+function grantPuzzlePiece() {
+  const candidates = photos
+    .map((photo) => ({
+      photo,
+      missing: Array.from({ length: PUZZLE_PIECES }, (_, piece) => piece).filter((piece) => !hasPiece(photo, piece)),
+    }))
+    .filter((item) => item.missing.length);
+
+  if (!candidates.length) {
+    rewardPiecePreview.style.backgroundImage = `url("${photos[0] || fallbackPhotos[0]}")`;
+    rewardPiecePreview.style.backgroundSize = "cover";
+    rewardPiecePreview.style.backgroundPosition = "center";
+    rewardPieceText.textContent = "你已经集齐全部猫猫拼图了。";
+    showPieceReward();
+    return;
+  }
+
+  const prize = candidates[Math.floor(Math.random() * candidates.length)];
+  const piece = prize.missing[Math.floor(Math.random() * prize.missing.length)];
+  addPiece(prize.photo, piece);
+  stylePiece(rewardPiecePreview, prize.photo, piece);
+  rewardPieceText.textContent = `获得 ${piece + 1} / ${PUZZLE_PIECES} 号拼图，已加入你的猫猫图鉴。`;
+  showPieceReward();
+}
+
+function showPieceReward() {
+  pieceRewardModal.classList.add("show");
+  pieceRewardModal.setAttribute("aria-hidden", "false");
+}
+
+function hidePieceReward() {
+  pieceRewardModal.classList.remove("show");
+  pieceRewardModal.setAttribute("aria-hidden", "true");
+}
+
+function renderCodex() {
+  playerIdText.textContent = profile.playerId;
+  codexGrid.innerHTML = "";
+  photos.forEach((photo, index) => {
+    const pieces = getPieces(photo);
+    const card = document.createElement("article");
+    const grid = document.createElement("div");
+    const meta = document.createElement("div");
+    const title = document.createElement("strong");
+    const progress = document.createElement("span");
+
+    card.className = "codex-card";
+    grid.className = "puzzle-grid";
+    title.textContent = `Cat ${String(index + 1).padStart(2, "0")}`;
+    progress.textContent = `${pieces.length} / ${PUZZLE_PIECES}`;
+
+    for (let piece = 0; piece < PUZZLE_PIECES; piece += 1) {
+      const cell = document.createElement("div");
+      cell.className = hasPiece(photo, piece) ? "puzzle-cell owned" : "puzzle-cell";
+      if (hasPiece(photo, piece)) stylePiece(cell, photo, piece);
+      grid.appendChild(cell);
+    }
+
+    meta.className = "codex-meta";
+    meta.append(title, progress);
+    card.append(grid, meta);
+    codexGrid.appendChild(card);
+  });
+}
+
+function showCodex() {
+  renderCodex();
+  codexModal.classList.add("show");
+  codexModal.setAttribute("aria-hidden", "false");
+}
+
+function hideCodex() {
+  codexModal.classList.remove("show");
+  codexModal.setAttribute("aria-hidden", "true");
 }
 
 function ensureAudio() {
@@ -648,13 +792,26 @@ nextButton.addEventListener("click", () => {
 
 resetButton.addEventListener("click", newGame);
 musicButton.addEventListener("click", () => toggleMusic(false));
+codexButton.addEventListener("click", showCodex);
 closeGalleryButton.addEventListener("click", hideFinalGallery);
 prevSlideButton.addEventListener("click", () => nextSlide(-1));
 nextSlideButton.addEventListener("click", () => nextSlide(1));
 roundPhotoButton.addEventListener("click", showRoundPhoto);
 closePhotoButton.addEventListener("click", hideRoundPhoto);
+closePieceRewardButton.addEventListener("click", hidePieceReward);
+openCodexFromRewardButton.addEventListener("click", () => {
+  hidePieceReward();
+  showCodex();
+});
+closeCodexButton.addEventListener("click", hideCodex);
 photoModal.addEventListener("click", (event) => {
   if (event.target === photoModal) hideRoundPhoto();
+});
+pieceRewardModal.addEventListener("click", (event) => {
+  if (event.target === pieceRewardModal) hidePieceReward();
+});
+codexModal.addEventListener("click", (event) => {
+  if (event.target === codexModal) hideCodex();
 });
 
 loadPhotos();

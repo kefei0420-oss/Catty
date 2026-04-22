@@ -9,13 +9,17 @@ let totalFinds = 0;
 let latestFind = null;
 
 function getPhotoFiles() {
+  const catsDir = path.join(publicDir, "assets", "cats");
+  const photoDir = fs.existsSync(catsDir) ? catsDir : path.join(publicDir, "assets");
+  const prefix = fs.existsSync(catsDir) ? "assets/cats" : "assets";
+
   return fs
-    .readdirSync(path.join(publicDir, "assets"), { withFileTypes: true })
+    .readdirSync(photoDir, { withFileTypes: true })
     .filter((entry) => entry.isFile())
     .map((entry) => entry.name)
     .filter((name) => /\.(jpe?g|png|webp)$/i.test(name))
     .sort()
-    .map((name) => `assets/${name}`);
+    .map((name) => `${prefix}/${name}`);
 }
 
 const mimeTypes = {
