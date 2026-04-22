@@ -51,6 +51,7 @@ const palette = {
 
 const fallbackPhotos = [
   "assets/20260422-225036.jpeg",
+  "assets/20260422-225040.jpeg",
   "assets/20260422-225044.jpeg",
   "assets/20260422-225047.jpeg",
   "assets/20260422-225050.jpeg",
