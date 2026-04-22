@@ -613,7 +613,15 @@ canvas {
   }
 
   .hud {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .hud .stat {
+    grid-column: span 3;
+  }
+
+  .hud .icon-button {
+    grid-column: span 2;
   }
 
   .case-bar {
