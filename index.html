@@ -40,16 +40,14 @@
         </div>
 
         <div class="play-area">
-          <aside class="case-panel" aria-label="猫猫线索">
-            <div class="photo-frame">
-              <img id="casePhoto" src="" alt="猫猫照片线索">
-            </div>
+          <div class="case-bar" aria-label="猫猫线索">
             <div class="case-copy">
               <span id="caseLabel">Case 01</span>
-              <strong id="caseTitle">灰白小猫失踪案</strong>
-              <p id="caseClue">正在读取猫猫线索...</p>
+              <div>
+                <strong id="caseTitle">灰白小猫失踪案</strong>
+                <p id="caseClue">正在读取猫猫线索...</p>
+              </div>
             </div>
-            <div id="photoStrip" class="photo-strip" aria-label="猫猫相册"></div>
             <div class="mini-stats">
               <div>
                 <span>专注</span>
@@ -60,7 +58,7 @@
                 <strong id="streakText">0</strong>
               </div>
             </div>
-          </aside>
+          </div>
 
           <div class="stage-wrap">
             <canvas id="gameCanvas" width="960" height="640" aria-label="像素猫猫房间"></canvas>
@@ -73,11 +71,26 @@
               </div>
             </div>
           </div>
+
+          <div id="photoStrip" class="photo-strip" aria-label="猫猫相册"></div>
         </div>
 
         <div class="controls">
           <button id="hintButton" class="primary-button" type="button">线索</button>
           <button id="nextButton" class="primary-button" type="button" disabled>下一案</button>
+        </div>
+      </section>
+
+      <section id="finalGallery" class="gallery-modal" aria-hidden="true" aria-label="猫猫照片奖励">
+        <div class="gallery-panel">
+          <div class="gallery-head">
+            <div>
+              <span>Case closed</span>
+              <h2>猫猫照片奖励</h2>
+            </div>
+            <button id="closeGalleryButton" class="icon-button" type="button" aria-label="关闭照片墙" title="关闭">×</button>
+          </div>
+          <div id="galleryGrid" class="gallery-grid"></div>
         </div>
       </section>
     </main>

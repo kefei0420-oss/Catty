@@ -12,11 +12,13 @@ const foundCard = document.querySelector("#foundCard");
 const foundImage = document.querySelector("#foundImage");
 const foundTitle = document.querySelector("#foundTitle");
 const foundNote = document.querySelector("#foundNote");
-const casePhoto = document.querySelector("#casePhoto");
 const caseLabel = document.querySelector("#caseLabel");
 const caseTitle = document.querySelector("#caseTitle");
 const caseClue = document.querySelector("#caseClue");
 const photoStrip = document.querySelector("#photoStrip");
+const finalGallery = document.querySelector("#finalGallery");
+const galleryGrid = document.querySelector("#galleryGrid");
+const closeGalleryButton = document.querySelector("#closeGalleryButton");
 const hintButton = document.querySelector("#hintButton");
 const nextButton = document.querySelector("#nextButton");
 const resetButton = document.querySelector("#resetButton");
@@ -200,9 +202,33 @@ function renderPhotoStrip() {
   });
 }
 
+function renderGallery() {
+  galleryGrid.innerHTML = "";
+  photos.forEach((src, index) => {
+    const figure = document.createElement("figure");
+    const img = document.createElement("img");
+    const caption = document.createElement("figcaption");
+    img.src = src;
+    img.alt = `猫猫奖励照片 ${index + 1}`;
+    caption.textContent = `No. ${String(index + 1).padStart(2, "0")}`;
+    figure.append(img, caption);
+    galleryGrid.appendChild(figure);
+  });
+}
+
+function showFinalGallery() {
+  renderGallery();
+  finalGallery.classList.add("show");
+  finalGallery.setAttribute("aria-hidden", "false");
+}
+
+function hideFinalGallery() {
+  finalGallery.classList.remove("show");
+  finalGallery.setAttribute("aria-hidden", "true");
+}
+
 function updateCasePanel() {
   const current = cases[levelIndex];
-  casePhoto.src = choosePhoto(levelIndex);
   caseLabel.textContent = `Case ${String(levelIndex + 1).padStart(2, "0")}`;
   caseTitle.textContent = current.name;
   caseClue.textContent = current.clue;
@@ -422,6 +448,7 @@ function revealCat(auto = false) {
   foundCard.classList.add("show");
   foundCard.setAttribute("aria-hidden", "false");
   nextButton.disabled = false;
+  nextButton.textContent = levelIndex === cases.length - 1 ? "照片奖励" : "下一案";
   setToast(auto ? "时间到，猫猫自己露面了。" : "结案。猫猫照片已入档。");
   chirp(true);
   updateHud();
@@ -470,8 +497,10 @@ function loadLevel(index) {
   hintLevel = 0;
   isFound = false;
   nextButton.disabled = true;
+  nextButton.textContent = "下一案";
   foundCard.classList.remove("show");
   foundCard.setAttribute("aria-hidden", "true");
+  hideFinalGallery();
   updateCasePanel();
   updateHud();
   setToast(cases[levelIndex].name);
@@ -519,6 +548,7 @@ hintButton.addEventListener("click", () => {
 nextButton.addEventListener("click", () => {
   if (levelIndex === cases.length - 1) {
     setToast(`全部结案：找到 ${found} 次猫猫。`);
+    showFinalGallery();
     nextButton.disabled = true;
     return;
   }
@@ -528,8 +558,11 @@ nextButton.addEventListener("click", () => {
 resetButton.addEventListener("click", () => {
   found = 0;
   streak = 0;
+  hideFinalGallery();
   loadLevel(0);
 });
+
+closeGalleryButton.addEventListener("click", hideFinalGallery);
 
 soundButton.addEventListener("click", () => {
   muted = !muted;
