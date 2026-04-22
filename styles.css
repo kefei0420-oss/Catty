@@ -522,12 +522,31 @@ canvas {
   }
 
   .case-bar {
-    grid-template-columns: 1fr;
+    grid-template-columns: auto minmax(0, 1fr) 58px;
+    gap: 9px;
+    align-items: start;
+    padding: 12px;
+  }
+
+  .case-bar > span {
+    padding: 4px 7px;
+    font-size: 11px;
+  }
+
+  .case-bar strong {
+    font-size: 18px;
+  }
+
+  .case-bar p {
+    font-size: 13px;
+    line-height: 1.35;
   }
 
   .round-photo {
-    width: 100%;
-    height: 92px;
+    width: 58px;
+    height: 58px;
+    align-self: start;
+    border-radius: 8px;
   }
 
   .found-card {
