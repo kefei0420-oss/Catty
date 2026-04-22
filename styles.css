@@ -169,7 +169,7 @@ h1 {
 
 .case-bar {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
   gap: 12px;
   align-items: center;
   padding: 13px 16px;
@@ -200,24 +200,6 @@ h1 {
   font-size: 14px;
   line-height: 1.45;
   font-weight: 600;
-}
-
-.round-photo {
-  width: 72px;
-  height: 54px;
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid rgba(239, 184, 91, 0.68);
-  border-radius: 7px;
-  background: #10150f;
-  cursor: zoom-in;
-}
-
-.round-photo img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
 }
 
 .stage-wrap {
@@ -294,6 +276,8 @@ canvas {
 .found-card.show {
   opacity: 1;
   transform: translateY(0) scale(1);
+  pointer-events: auto;
+  cursor: zoom-in;
 }
 
 .found-card img {
@@ -366,48 +350,6 @@ canvas {
   margin: 4px 0 0;
   font-size: 28px;
   line-height: 1.15;
-}
-
-.slide-stage {
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) 56px;
-  gap: 12px;
-  align-items: center;
-  padding: 16px;
-}
-
-.slide-stage figure {
-  margin: 0;
-  overflow: hidden;
-  background: #10150f;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-
-.slide-stage img {
-  width: 100%;
-  height: min(62vh, 560px);
-  display: block;
-  object-fit: contain;
-  background: #0d110c;
-}
-
-.slide-stage figcaption {
-  padding: 10px 12px;
-  color: var(--muted);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
-}
-
-.slide-button {
-  width: 56px;
-  height: 72px;
-  border: 1px solid rgba(226, 237, 212, 0.24);
-  border-radius: 7px;
-  background: #26311f;
-  color: var(--gold);
-  font-size: 34px;
-  cursor: pointer;
 }
 
 .photo-modal {
@@ -561,8 +503,8 @@ canvas {
 }
 
 .codex-card.locked .codex-photo {
-  filter: grayscale(0.9) brightness(0.82) contrast(0.92);
-  opacity: 0.72;
+  filter: grayscale(0.95) brightness(0.66) contrast(0.9);
+  opacity: 0.9;
 }
 
 .codex-meta {
@@ -649,18 +591,6 @@ canvas {
     min-width: 0;
   }
 
-  .slide-stage {
-    grid-template-columns: 44px minmax(0, 1fr) 44px;
-    gap: 8px;
-    padding: 10px;
-  }
-
-  .slide-button {
-    width: 44px;
-    height: 58px;
-    font-size: 28px;
-  }
-
   .piece-reward-panel {
     width: min(100%, 380px);
     padding: 16px;
@@ -687,7 +617,7 @@ canvas {
   }
 
   .case-bar {
-    grid-template-columns: auto minmax(0, 1fr) 58px;
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 9px;
     align-items: start;
     padding: 12px;
@@ -705,13 +635,6 @@ canvas {
   .case-bar p {
     font-size: 13px;
     line-height: 1.35;
-  }
-
-  .round-photo {
-    width: 58px;
-    height: 58px;
-    align-self: start;
-    border-radius: 8px;
   }
 
   .found-card {

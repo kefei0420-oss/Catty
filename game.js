@@ -15,8 +15,6 @@ const caseTitle = document.querySelector("#caseTitle");
 const caseClue = document.querySelector("#caseClue");
 const photoModal = document.querySelector("#photoModal");
 const photoModalImage = document.querySelector("#photoModalImage");
-const roundPhotoButton = document.querySelector("#roundPhotoButton");
-const roundPhotoThumb = document.querySelector("#roundPhotoThumb");
 const closePhotoButton = document.querySelector("#closePhotoButton");
 const hintButton = document.querySelector("#hintButton");
 const nextButton = document.querySelector("#nextButton");
@@ -49,22 +47,23 @@ const palette = {
   blue: "#73b7ff",
 };
 
-const fallbackPhotos = [
-  "assets/20260422-225036.jpeg",
-  "assets/20260422-225040.jpeg",
-  "assets/20260422-225044.jpeg",
-  "assets/20260422-225047.jpeg",
-  "assets/20260422-225050.jpeg",
-  "assets/20260422-225053.jpeg",
-  "assets/20260422-225056.jpeg",
-  "assets/20260422-225100.jpeg",
-  "assets/20260422-225104.jpeg",
-  "assets/20260422-225108.jpeg",
-  "assets/20260422-225112.jpeg",
-  "assets/20260422-225115.jpeg",
+const curatedPhotos = [
+  "assets/cats-web/20260422-225036.jpg",
+  "assets/cats-web/20260422-225044.jpg",
+  "assets/cats-web/20260422-225053.jpg",
+  "assets/cats-web/20260422-225104.jpg",
+  "assets/cats-web/IMG_0337.png",
+  "assets/cats-web/IMG_1875.png",
+  "assets/cats-web/IMG_2239.png",
+  "assets/cats-web/IMG_4089.jpg",
+  "assets/cats-web/IMG_7502.png",
+  "assets/cats-web/IMG_9197.png",
 ];
 
+const fallbackPhotos = curatedPhotos;
+
 const PROFILE_KEY = "catty-photo-codex-v1";
+const MUSIC_KEY = "catty-music-enabled-v1";
 
 const allCases = [
   makeCase("床边潜伏", "白色前爪、灰色耳朵，通常贴着软软的布料边缘。", "白爪爪从被边露出来了。", 50, { x: 146, y: 396, w: 182, h: 94, type: "blanket" }),
@@ -125,7 +124,7 @@ let timerId = null;
 let toastId = null;
 let mouse = { x: 480, y: 320, active: false };
 let audio = null;
-let musicOn = false;
+let musicOn = loadMusicPreference();
 let musicTimer = null;
 let rewardGranted = false;
 let profile = loadProfile();
@@ -194,6 +193,15 @@ function saveProfile() {
   localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
 }
 
+function loadMusicPreference() {
+  const stored = localStorage.getItem(MUSIC_KEY);
+  return stored === null ? false : stored === "true";
+}
+
+function saveMusicPreference() {
+  localStorage.setItem(MUSIC_KEY, String(musicOn));
+}
+
 function isUnlocked(photo) {
   return Boolean(profile.collection[photo]);
 }
@@ -242,7 +250,10 @@ async function loadPhotos() {
     const response = await fetch("api/photos");
     if (!response.ok) return;
     const data = await response.json();
-    if (Array.isArray(data.photos) && data.photos.length) photos = data.photos;
+    if (Array.isArray(data.photos) && data.photos.length) {
+      const available = new Set(data.photos);
+      photos = curatedPhotos.filter((photo) => available.has(photo));
+    }
     migrateCollectionToCurrentPhotos();
   } catch {
     photos = fallbackPhotos;
@@ -550,8 +561,6 @@ function loadLevel(index) {
   caseLabel.textContent = `Case ${String(levelIndex + 1).padStart(2, "0")}`;
   caseTitle.textContent = current.name;
   caseClue.textContent = current.clue;
-  roundPhotoThumb.src = currentPhoto();
-  roundPhotoThumb.alt = `${current.name} 的猫猫照片`;
   updateHud();
   setToast(current.name);
   startTimer();
@@ -690,19 +699,32 @@ function musicTick() {
 }
 
 function toggleMusic(forceOn = false) {
-  ensureAudio();
-  if (!audio) return;
-  if (audio.context.state === "suspended") audio.context.resume();
   musicOn = forceOn ? true : !musicOn;
+  saveMusicPreference();
   musicButton.textContent = musicOn ? "♫" : "♪";
   clearInterval(musicTimer);
   if (musicOn) {
+    ensureAudio();
+    if (!audio) return;
+    if (audio.context.state === "suspended") audio.context.resume();
+    musicTick();
+    musicTimer = setInterval(musicTick, 360);
+  }
+}
+
+function resumeMusicIfEnabled() {
+  if (!musicOn) return;
+  ensureAudio();
+  if (!audio) return;
+  if (audio.context.state === "suspended") audio.context.resume();
+  if (!musicTimer) {
     musicTick();
     musicTimer = setInterval(musicTick, 360);
   }
 }
 
 function beep(success) {
+  if (!musicOn) return;
   ensureAudio();
   if (!audio) return;
   if (audio.context.state === "suspended") audio.context.resume();
@@ -710,6 +732,7 @@ function beep(success) {
 }
 
 function rewardFanfare() {
+  if (!musicOn) return;
   ensureAudio();
   if (!audio) return;
   if (audio.context.state === "suspended") audio.context.resume();
@@ -726,7 +749,7 @@ canvas.addEventListener("mouseleave", () => {
 });
 
 canvas.addEventListener("click", (event) => {
-  if (!musicOn) toggleMusic(true);
+  resumeMusicIfEnabled();
   if (isFound) return;
   const current = sessionCases[levelIndex];
   const point = canvasPoint(event);
@@ -740,7 +763,7 @@ canvas.addEventListener("click", (event) => {
 });
 
 hintButton.addEventListener("click", () => {
-  if (!musicOn) toggleMusic(true);
+  resumeMusicIfEnabled();
   const current = sessionCases[levelIndex];
   const text = current.hint[Math.min(hintLevel, current.hint.length - 1)];
   hintLevel = Math.min(hintLevel + 1, current.hint.length);
@@ -768,7 +791,10 @@ nextButton.addEventListener("click", () => {
 resetButton.addEventListener("click", newGame);
 musicButton.addEventListener("click", () => toggleMusic(false));
 codexButton.addEventListener("click", showCodex);
-roundPhotoButton.addEventListener("click", showRoundPhoto);
+foundCard.addEventListener("click", () => {
+  if (!isFound) return;
+  showRoundPhoto();
+});
 closePhotoButton.addEventListener("click", hideRoundPhoto);
 closePieceRewardButton.addEventListener("click", hidePieceReward);
 openCodexFromRewardButton.addEventListener("click", () => {
@@ -788,6 +814,7 @@ codexModal.addEventListener("click", (event) => {
 
 async function init() {
   await loadPhotos();
+  musicButton.textContent = musicOn ? "♫" : "♪";
   newGame();
   render();
 }
