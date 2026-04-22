@@ -1,15 +1,17 @@
 :root {
   color-scheme: dark;
-  --ink: #f6f0dc;
-  --muted: #b9c0b2;
-  --bg: #151812;
-  --panel: #22281d;
-  --panel-2: #2d3427;
-  --green: #8bd46f;
-  --gold: #f6b84b;
-  --pink: #ff8fa3;
-  --blue: #73b7ff;
-  --shadow: #090b08;
+  --page: #10130f;
+  --surface: #171d16;
+  --surface-2: #20281f;
+  --line: #4e5d4a;
+  --line-soft: rgba(220, 233, 205, 0.16);
+  --text: #f3efdf;
+  --muted: #aeb9a6;
+  --green: #9ccd7f;
+  --gold: #eeb85b;
+  --blue: #8bbbd9;
+  --danger: #d56d62;
+  --shadow: rgba(0, 0, 0, 0.34);
 }
 
 * {
@@ -20,10 +22,12 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    linear-gradient(180deg, rgba(21, 24, 18, 0.94), rgba(16, 18, 14, 0.98)),
-    repeating-linear-gradient(0deg, #161a13 0 4px, #1a1f17 4px 8px);
-  color: var(--ink);
-  font-family: "PingFang SC", "Hiragino Sans GB", system-ui, sans-serif;
+    radial-gradient(circle at 18% 8%, rgba(156, 205, 127, 0.08), transparent 28%),
+    linear-gradient(180deg, #151a13 0%, var(--page) 100%);
+  color: var(--text);
+  font-family: "PingFang SC", "Songti SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 button {
@@ -32,25 +36,26 @@ button {
 }
 
 .game-shell {
-  width: min(1180px, calc(100vw - 28px));
+  width: min(1180px, calc(100vw - 32px));
   margin: 0 auto;
-  padding: 28px 0 36px;
+  padding: 24px 0 32px;
 }
 
 .hero {
-  min-height: clamp(142px, 23vh, 220px);
+  min-height: 134px;
   display: grid;
   align-content: end;
-  padding: 8px 0 24px;
+  padding-bottom: 22px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-family: "Courier New", ui-monospace, monospace;
-  font-size: 11px;
+  gap: 9px;
   color: var(--green);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -61,37 +66,35 @@ h1 {
 }
 
 .spark {
-  width: 18px;
-  height: 18px;
-  image-rendering: pixelated;
+  width: 14px;
+  height: 14px;
   background:
-    linear-gradient(var(--gold) 0 0) 6px 0 / 6px 18px no-repeat,
-    linear-gradient(var(--gold) 0 0) 0 6px / 18px 6px no-repeat;
-  filter: drop-shadow(0 0 8px rgba(246, 184, 75, 0.35));
+    linear-gradient(var(--gold) 0 0) 5px 0 / 4px 14px no-repeat,
+    linear-gradient(var(--gold) 0 0) 0 5px / 14px 4px no-repeat;
 }
 
 h1 {
-  margin-top: 12px;
-  font-size: clamp(44px, 9vw, 104px);
-  line-height: 0.95;
-  font-weight: 900;
+  margin-top: 8px;
+  font-size: clamp(40px, 7vw, 78px);
+  line-height: 1.02;
+  font-weight: 760;
   letter-spacing: 0;
-  text-shadow: 0 7px 0 var(--shadow);
 }
 
 .tagline {
-  margin-top: 14px;
-  max-width: 720px;
+  margin-top: 10px;
+  max-width: 620px;
   color: var(--muted);
-  font-size: clamp(16px, 2.2vw, 22px);
-  font-weight: 700;
+  font-size: clamp(15px, 1.7vw, 19px);
+  line-height: 1.55;
+  font-weight: 600;
 }
 
 .game-panel {
-  background: var(--panel);
-  border: 4px solid #48523e;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  box-shadow: 0 18px 0 var(--shadow);
+  box-shadow: 0 20px 44px var(--shadow);
   overflow: hidden;
 }
 
@@ -100,14 +103,14 @@ h1 {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px;
-  background: #1a1f16;
-  border-bottom: 4px solid #48523e;
+  padding: 12px;
+  background: rgba(13, 17, 12, 0.78);
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .controls {
   justify-content: flex-end;
-  border-top: 4px solid #48523e;
+  border-top: 1px solid var(--line-soft);
   border-bottom: 0;
 }
 
@@ -118,38 +121,43 @@ h1 {
   align-content: center;
   gap: 4px;
   padding: 0 12px;
-  background: var(--panel-2);
-  border: 3px solid #56624b;
-  border-radius: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 7px;
 }
 
-.stat span {
+.stat span,
+.mini-stats span {
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
 }
 
-.stat strong {
-  font-family: "Courier New", ui-monospace, monospace;
-  font-size: 14px;
+.stat strong,
+.mini-stats strong {
   color: var(--gold);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 15px;
+  letter-spacing: 0;
 }
 
 .icon-button,
 .primary-button {
-  height: 52px;
-  border: 3px solid #6d7c5e;
-  border-radius: 6px;
-  background: #34402c;
-  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.24);
+  height: 46px;
+  border: 1px solid rgba(220, 233, 205, 0.22);
+  border-radius: 7px;
+  background: #253020;
   cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
 }
 
 .icon-button {
-  width: 56px;
+  width: 48px;
   margin-left: auto;
-  font-family: "Courier New", ui-monospace, monospace;
   color: var(--green);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .icon-button + .icon-button {
@@ -157,16 +165,17 @@ h1 {
 }
 
 .primary-button {
-  min-width: 118px;
+  min-width: 116px;
   padding: 0 18px;
-  color: var(--ink);
-  font-weight: 900;
+  color: var(--text);
+  font-weight: 700;
 }
 
 .primary-button:not(:disabled):hover,
 .icon-button:hover {
-  transform: translateY(-2px);
-  border-color: var(--gold);
+  transform: translateY(-1px);
+  border-color: rgba(238, 184, 91, 0.72);
+  background: #303a29;
 }
 
 .primary-button:disabled {
@@ -174,17 +183,10 @@ h1 {
   cursor: not-allowed;
 }
 
-.stage-wrap {
-  position: relative;
-  min-width: 0;
-  aspect-ratio: 3 / 2;
-  background: #10140e;
-}
-
 .play-area {
   display: grid;
-  grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
-  min-height: 520px;
+  grid-template-columns: minmax(270px, 340px) minmax(0, 1fr);
+  min-height: 536px;
 }
 
 .case-panel {
@@ -192,20 +194,17 @@ h1 {
   grid-template-rows: auto auto 1fr auto;
   gap: 14px;
   padding: 16px;
-  background:
-    linear-gradient(180deg, rgba(48, 57, 42, 0.94), rgba(30, 36, 27, 0.98)),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 8px);
-  border-right: 4px solid #48523e;
+  background: #1b231a;
+  border-right: 1px solid var(--line-soft);
 }
 
 .photo-frame {
   position: relative;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-  border: 4px solid #64745a;
+  border: 1px solid rgba(238, 184, 91, 0.52);
   border-radius: 8px;
-  background: #121610;
-  box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.18);
+  background: #0d100c;
 }
 
 .photo-frame::after {
@@ -213,18 +212,15 @@ h1 {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 2px, transparent 2px 6px),
-    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.16));
-  mix-blend-mode: overlay;
+  background: linear-gradient(180deg, transparent 66%, rgba(0, 0, 0, 0.18));
 }
 
 .photo-frame img {
   width: 100%;
   height: 100%;
+  display: block;
   object-fit: cover;
-  image-rendering: pixelated;
-  filter: contrast(1.14) saturate(1.08);
+  filter: contrast(1.05) saturate(1.03);
 }
 
 .case-copy {
@@ -234,19 +230,18 @@ h1 {
 
 .case-copy span {
   width: fit-content;
-  padding: 5px 8px;
+  padding: 4px 7px;
   color: #151812;
   background: var(--gold);
   border-radius: 4px;
-  font-family: "Courier New", ui-monospace, monospace;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .case-copy strong {
   font-size: 22px;
-  line-height: 1.16;
-  font-weight: 900;
+  line-height: 1.18;
+  font-weight: 760;
 }
 
 .case-copy p {
@@ -254,31 +249,31 @@ h1 {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.55;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .photo-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   align-content: start;
-  gap: 7px;
+  gap: 8px;
 }
 
 .photo-strip img {
   width: 100%;
   aspect-ratio: 1;
+  display: block;
   object-fit: cover;
-  border: 2px solid #4d5847;
-  border-radius: 5px;
-  opacity: 0.55;
-  image-rendering: pixelated;
-  filter: saturate(0.75) contrast(1.05);
+  border: 1px solid rgba(220, 233, 205, 0.18);
+  border-radius: 6px;
+  opacity: 0.64;
+  filter: saturate(0.86) contrast(1.02);
 }
 
 .photo-strip img.active {
   border-color: var(--gold);
   opacity: 1;
-  box-shadow: 0 0 0 2px rgba(246, 184, 75, 0.18);
+  box-shadow: 0 0 0 2px rgba(238, 184, 91, 0.16);
 }
 
 .mini-stats {
@@ -288,26 +283,26 @@ h1 {
 }
 
 .mini-stats div {
-  min-height: 58px;
+  min-height: 54px;
   display: grid;
   align-content: center;
   gap: 4px;
   padding: 0 12px;
-  background: rgba(18, 22, 16, 0.72);
-  border: 3px solid #56624b;
-  border-radius: 6px;
-}
-
-.mini-stats span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
+  background: #151b14;
+  border: 1px solid var(--line-soft);
+  border-radius: 7px;
 }
 
 .mini-stats strong {
   color: var(--green);
-  font-family: "Courier New", ui-monospace, monospace;
-  font-size: 18px;
+  font-size: 17px;
+}
+
+.stage-wrap {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 3 / 2;
+  background: #10140e;
 }
 
 canvas {
@@ -322,16 +317,17 @@ canvas {
   position: absolute;
   left: 16px;
   bottom: 16px;
-  max-width: min(460px, calc(100% - 32px));
+  max-width: min(480px, calc(100% - 32px));
   min-height: 42px;
   display: grid;
   place-items: center start;
   padding: 10px 14px;
-  background: rgba(13, 16, 12, 0.82);
-  border: 3px solid rgba(139, 212, 111, 0.72);
-  border-radius: 6px;
-  color: var(--ink);
-  font-weight: 900;
+  background: rgba(12, 15, 11, 0.88);
+  border: 1px solid rgba(156, 205, 127, 0.54);
+  border-radius: 7px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 650;
   opacity: 0;
   transform: translateY(8px);
   transition: 160ms ease;
@@ -353,11 +349,11 @@ canvas {
   gap: 12px;
   align-items: center;
   padding: 12px;
-  background: rgba(246, 240, 220, 0.94);
-  border: 4px solid var(--gold);
+  background: rgba(243, 239, 223, 0.96);
+  border: 1px solid rgba(238, 184, 91, 0.86);
   border-radius: 8px;
-  color: #202519;
-  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.28);
+  color: #1d241a;
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.32);
   opacity: 0;
   transform: translateY(12px) scale(0.98);
   transition: 180ms ease;
@@ -372,29 +368,33 @@ canvas {
 .found-card img {
   width: 112px;
   height: 88px;
+  display: block;
   object-fit: cover;
-  image-rendering: pixelated;
-  filter: contrast(1.18) saturate(1.15);
-  border: 3px solid #202519;
-  border-radius: 4px;
+  border: 1px solid #202519;
+  border-radius: 6px;
 }
 
 .found-card p {
   margin: 0 0 6px;
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 760;
 }
 
 .found-card span {
-  color: #5a5e4f;
+  color: #59614f;
   font-size: 14px;
-  font-weight: 800;
+  line-height: 1.45;
+  font-weight: 600;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 860px) {
   .game-shell {
-    width: min(100vw - 18px, 620px);
-    padding-top: 18px;
+    width: min(100vw - 18px, 680px);
+    padding-top: 16px;
+  }
+
+  .hero {
+    min-height: 116px;
   }
 
   .hud {
@@ -404,12 +404,12 @@ canvas {
 
   .stat {
     min-width: 0;
-    height: 50px;
+    height: 48px;
     padding: 0 8px;
   }
 
   .stat strong {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .icon-button {
@@ -417,19 +417,15 @@ canvas {
     margin-left: 0;
   }
 
-  .stage-wrap {
-    aspect-ratio: 4 / 3;
-  }
-
   .play-area {
     grid-template-columns: 1fr;
   }
 
   .case-panel {
-    grid-template-columns: 112px 1fr;
+    grid-template-columns: 118px 1fr;
     grid-template-rows: auto auto;
     border-right: 0;
-    border-bottom: 4px solid #48523e;
+    border-bottom: 1px solid var(--line-soft);
   }
 
   .photo-frame {
@@ -445,6 +441,10 @@ canvas {
     grid-column: 2;
   }
 
+  .stage-wrap {
+    aspect-ratio: 4 / 3;
+  }
+
   .controls {
     justify-content: stretch;
   }
@@ -452,6 +452,29 @@ canvas {
   .primary-button {
     flex: 1;
     min-width: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  h1 {
+    font-size: 42px;
+  }
+
+  .hud {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .case-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .photo-frame,
+  .mini-stats {
+    grid-column: 1;
+  }
+
+  .photo-frame {
+    aspect-ratio: 16 / 10;
   }
 
   .found-card {

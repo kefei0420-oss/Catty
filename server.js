@@ -15,7 +15,7 @@ function getPhotoFiles() {
     .map((entry) => entry.name)
     .filter((name) => /\.(jpe?g|png|webp)$/i.test(name))
     .sort()
-    .map((name) => `/assets/${name}`);
+    .map((name) => `assets/${name}`);
 }
 
 const mimeTypes = {

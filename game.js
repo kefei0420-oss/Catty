@@ -40,18 +40,18 @@ const palette = {
 };
 
 const fallbackPhotos = [
-  "/assets/20260422-225036.jpeg",
-  "/assets/20260422-225040.jpeg",
-  "/assets/20260422-225044.jpeg",
-  "/assets/20260422-225047.jpeg",
-  "/assets/20260422-225050.jpeg",
-  "/assets/20260422-225053.jpeg",
-  "/assets/20260422-225056.jpeg",
-  "/assets/20260422-225100.jpeg",
-  "/assets/20260422-225104.jpeg",
-  "/assets/20260422-225108.jpeg",
-  "/assets/20260422-225112.jpeg",
-  "/assets/20260422-225115.jpeg",
+  "assets/20260422-225036.jpeg",
+  "assets/20260422-225040.jpeg",
+  "assets/20260422-225044.jpeg",
+  "assets/20260422-225047.jpeg",
+  "assets/20260422-225050.jpeg",
+  "assets/20260422-225053.jpeg",
+  "assets/20260422-225056.jpeg",
+  "assets/20260422-225100.jpeg",
+  "assets/20260422-225104.jpeg",
+  "assets/20260422-225108.jpeg",
+  "assets/20260422-225112.jpeg",
+  "assets/20260422-225115.jpeg",
 ];
 
 const cases = [
@@ -148,7 +148,7 @@ function choosePhoto(index) {
 
 async function loadPhotos() {
   try {
-    const response = await fetch("/api/photos");
+    const response = await fetch("api/photos");
     if (!response.ok) return;
     const data = await response.json();
     if (Array.isArray(data.photos) && data.photos.length) {
@@ -163,7 +163,7 @@ async function loadPhotos() {
 
 async function loadStats() {
   try {
-    const response = await fetch("/api/stats");
+    const response = await fetch("api/stats");
     if (!response.ok) return;
     const stats = await response.json();
     globalFinds = Number(stats.totalFinds || 0);
@@ -175,7 +175,7 @@ async function loadStats() {
 
 async function recordFind(levelName) {
   try {
-    const response = await fetch("/api/find", {
+    const response = await fetch("api/find", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ level: levelName }),
@@ -315,9 +315,8 @@ function drawObject(area, isTarget) {
 }
 
 function drawSubtleClue(area) {
-  const shimmer = Math.sin(pulse / 22) > 0 ? palette.gold : "#a87338";
   if (hintLevel >= 1) {
-    pixelRect(area.x + area.w - 42, area.y + 34, 8, 8, shimmer);
+    pixelRect(area.x + area.w - 42, area.y + 34, 8, 8, "#d69b46");
     pixelRect(area.x + area.w - 25, area.y + 34, 5, 8, palette.ink);
   }
   if (hintLevel >= 2) {
@@ -344,7 +343,7 @@ function drawHiddenCat(area) {
 
 function drawScanner() {
   if (!mouse.active || isFound) return;
-  const size = 72 + Math.sin(pulse / 10) * 4;
+  const size = 72;
   ctx.save();
   ctx.globalAlpha = 0.16;
   ctx.fillStyle = palette.green;
