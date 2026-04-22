@@ -220,19 +220,71 @@ function addPiece(photo, piece) {
 }
 
 function piecePosition(piece) {
-  const col = piece % PUZZLE_GRID;
-  const row = Math.floor(piece / PUZZLE_GRID);
   return {
-    x: col === 0 ? "0%" : col === 1 ? "50%" : "100%",
-    y: row === 0 ? "0%" : row === 1 ? "50%" : "100%",
+    col: piece % PUZZLE_GRID,
+    row: Math.floor(piece / PUZZLE_GRID),
   };
 }
 
-function stylePiece(element, photo, piece) {
-  const pos = piecePosition(piece);
-  element.style.backgroundImage = `url("${photo}")`;
-  element.style.backgroundSize = `${PUZZLE_GRID * 100}% ${PUZZLE_GRID * 100}%`;
-  element.style.backgroundPosition = `${pos.x} ${pos.y}`;
+function photoKey(photo) {
+  return String(photo).split("/").pop().replace(/\.[^.]+$/, "").toLowerCase();
+}
+
+function migrateCollectionToCurrentPhotos() {
+  const photoMap = new Map(photos.map((photo) => [photoKey(photo), photo]));
+  const nextCollection = {};
+
+  Object.entries(profile.collection || {}).forEach(([storedPhoto, pieces]) => {
+    const normalized = photoMap.get(photoKey(storedPhoto)) || storedPhoto;
+    const uniquePieces = Array.from(new Set(Array.isArray(pieces) ? pieces : [])).sort((a, b) => a - b);
+    const current = new Set(Array.isArray(nextCollection[normalized]) ? nextCollection[normalized] : []);
+    uniquePieces.forEach((piece) => current.add(piece));
+    nextCollection[normalized] = Array.from(current).sort((a, b) => a - b);
+  });
+
+  profile.collection = nextCollection;
+  saveProfile();
+}
+
+function renderPieceInto(element, photo, piece) {
+  const { col, row } = piecePosition(piece);
+  element.innerHTML = "";
+  const img = document.createElement("img");
+  img.className = "piece-face";
+  img.src = photo;
+  img.alt = "";
+  img.draggable = false;
+  img.style.width = `${PUZZLE_GRID * 100}%`;
+  img.style.height = `${PUZZLE_GRID * 100}%`;
+  img.style.left = `${col * -100}%`;
+  img.style.top = `${row * -100}%`;
+  element.appendChild(img);
+}
+
+function renderRewardPiece(photo, piece, complete = false) {
+  rewardPiecePreview.innerHTML = "";
+  rewardPiecePreview.classList.toggle("complete", complete);
+
+  const full = document.createElement("img");
+  full.className = "reward-piece-full";
+  full.src = photo;
+  full.alt = "";
+  full.draggable = false;
+  rewardPiecePreview.appendChild(full);
+
+  if (!complete) {
+    const spotlight = document.createElement("div");
+    spotlight.className = "reward-piece-spotlight";
+    renderPieceInto(spotlight, photo, piece);
+    rewardPiecePreview.appendChild(spotlight);
+  }
+}
+
+function openPhoto(src, alt = "猫猫照片") {
+  photoModalImage.src = src;
+  photoModalImage.alt = alt;
+  photoModal.classList.add("show");
+  photoModal.setAttribute("aria-hidden", "false");
 }
 
 async function loadPhotos() {
@@ -241,6 +293,7 @@ async function loadPhotos() {
     if (!response.ok) return;
     const data = await response.json();
     if (Array.isArray(data.photos) && data.photos.length) photos = data.photos;
+    migrateCollectionToCurrentPhotos();
     if (sessionCases.length) {
       roundPhotoThumb.src = currentPhoto();
       roundPhotoThumb.alt = `${sessionCases[levelIndex].name} 的猫猫照片`;
@@ -598,9 +651,7 @@ function hideFinalGallery() {
 }
 
 function showRoundPhoto() {
-  photoModalImage.src = currentPhoto();
-  photoModal.classList.add("show");
-  photoModal.setAttribute("aria-hidden", "false");
+  openPhoto(currentPhoto(), `${sessionCases[levelIndex].name} 的猫猫照片`);
 }
 
 function hideRoundPhoto() {
@@ -617,9 +668,7 @@ function grantPuzzlePiece() {
     .filter((item) => item.missing.length);
 
   if (!candidates.length) {
-    rewardPiecePreview.style.backgroundImage = `url("${photos[0] || fallbackPhotos[0]}")`;
-    rewardPiecePreview.style.backgroundSize = "cover";
-    rewardPiecePreview.style.backgroundPosition = "center";
+    renderRewardPiece(photos[0] || fallbackPhotos[0], 0, true);
     rewardPieceText.textContent = "你已经集齐全部猫猫拼图了。";
     showPieceReward();
     return;
@@ -628,7 +677,7 @@ function grantPuzzlePiece() {
   const prize = candidates[Math.floor(Math.random() * candidates.length)];
   const piece = prize.missing[Math.floor(Math.random() * prize.missing.length)];
   addPiece(prize.photo, piece);
-  stylePiece(rewardPiecePreview, prize.photo, piece);
+  renderRewardPiece(prize.photo, piece, false);
   rewardPieceText.textContent = `获得 ${piece + 1} / ${PUZZLE_PIECES} 号拼图，已加入你的猫猫图鉴。`;
   showPieceReward();
 }
@@ -646,29 +695,58 @@ function hidePieceReward() {
 function renderCodex() {
   playerIdText.textContent = profile.playerId;
   codexGrid.innerHTML = "";
-  photos.forEach((photo, index) => {
+  const orderedPhotos = [...photos].sort((a, b) => getPieces(b).length - getPieces(a).length);
+
+  orderedPhotos.forEach((photo, index) => {
     const pieces = getPieces(photo);
     const card = document.createElement("article");
+    const frame = document.createElement("div");
+    const preview = document.createElement("img");
     const grid = document.createElement("div");
     const meta = document.createElement("div");
+    const heading = document.createElement("div");
     const title = document.createElement("strong");
     const progress = document.createElement("span");
+    const status = document.createElement("p");
+    const progressBar = document.createElement("div");
+    const progressFill = document.createElement("i");
+    const action = document.createElement("button");
 
     card.className = "codex-card";
+    frame.className = "codex-frame";
+    preview.className = "codex-photo";
     grid.className = "puzzle-grid";
     title.textContent = `Cat ${String(index + 1).padStart(2, "0")}`;
     progress.textContent = `${pieces.length} / ${PUZZLE_PIECES}`;
+    status.textContent = pieces.length === PUZZLE_PIECES ? "已集齐" : pieces.length ? "收集中" : "未解锁";
+    action.className = "codex-open";
+    action.type = "button";
+    action.textContent = pieces.length === PUZZLE_PIECES ? "查看大图" : "继续收集";
+    action.disabled = pieces.length !== PUZZLE_PIECES;
+    preview.src = photo;
+    preview.alt = "";
+    preview.draggable = false;
+    progressBar.className = "codex-progress";
+    progressFill.style.width = `${(pieces.length / PUZZLE_PIECES) * 100}%`;
 
     for (let piece = 0; piece < PUZZLE_PIECES; piece += 1) {
       const cell = document.createElement("div");
       cell.className = hasPiece(photo, piece) ? "puzzle-cell owned" : "puzzle-cell";
-      if (hasPiece(photo, piece)) stylePiece(cell, photo, piece);
+      if (hasPiece(photo, piece)) renderPieceInto(cell, photo, piece);
       grid.appendChild(cell);
     }
 
     meta.className = "codex-meta";
-    meta.append(title, progress);
-    card.append(grid, meta);
+    heading.className = "codex-heading";
+    heading.append(title, progress);
+    progressBar.append(progressFill);
+    meta.append(heading, status, progressBar, action);
+    frame.append(preview, grid);
+    card.append(frame, meta);
+    if (pieces.length === PUZZLE_PIECES) {
+      card.classList.add("complete");
+      action.addEventListener("click", () => openPhoto(photo, `${title.textContent} 完整照片`));
+    }
     codexGrid.appendChild(card);
   });
 }

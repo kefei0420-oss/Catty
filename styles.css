@@ -497,18 +497,51 @@ canvas {
 }
 
 .piece-preview {
+  position: relative;
   width: min(100%, 240px);
   aspect-ratio: 1;
   justify-self: center;
+  overflow: hidden;
   border: 1px solid rgba(239, 184, 91, 0.56);
   border-radius: 8px;
-  background-color: #0f140d;
-  background-repeat: no-repeat;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(244, 239, 223, 0.08), transparent 46%),
+    linear-gradient(180deg, #121811 0%, #0f140d 100%);
   box-shadow: inset 0 0 0 1px rgba(226, 237, 212, 0.08);
 }
 
 .piece-reward-panel .primary-button {
   justify-self: end;
+}
+
+.reward-piece-full {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.18;
+  filter: saturate(0.8) blur(1px);
+}
+
+.reward-piece-spotlight {
+  position: absolute;
+  inset: 14%;
+  overflow: hidden;
+  border: 1px solid rgba(239, 184, 91, 0.72);
+  border-radius: 10px;
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(244, 239, 223, 0.18);
+}
+
+.piece-preview.complete .reward-piece-full {
+  opacity: 1;
+  filter: none;
+}
+
+.reward-piece-spotlight .piece-face {
+  transform: scale(1.02);
 }
 
 .codex-panel {
@@ -540,42 +573,132 @@ canvas {
   border-radius: 8px;
 }
 
+.codex-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  aspect-ratio: 1;
+  background: #0e130d;
+  border: 1px solid rgba(226, 237, 212, 0.08);
+}
+
+.codex-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.16;
+  filter: saturate(0.8) contrast(0.92);
+}
+
+.codex-card.complete .codex-photo {
+  opacity: 0.28;
+}
+
 .puzzle-grid {
+  position: absolute;
+  inset: 8px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 4px;
-  aspect-ratio: 1;
 }
 
 .puzzle-cell {
+  position: relative;
+  overflow: hidden;
   border-radius: 4px;
-  background: linear-gradient(135deg, #2a3127, #20271d);
+  background:
+    linear-gradient(135deg, rgba(42, 49, 39, 0.92), rgba(27, 33, 24, 0.96));
   border: 1px solid rgba(226, 237, 212, 0.08);
   box-shadow: inset 0 0 0 1px rgba(226, 237, 212, 0.03);
 }
 
+.puzzle-cell::after {
+  content: "·";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(239, 184, 91, 0.42);
+  font-size: 22px;
+  line-height: 1;
+}
+
 .puzzle-cell.owned {
-  background-color: #0f140d;
-  background-repeat: no-repeat;
+  background: rgba(15, 20, 13, 0.18);
+  border-color: rgba(239, 184, 91, 0.32);
+}
+
+.puzzle-cell.owned::after {
+  display: none;
+}
+
+.piece-face {
+  position: absolute;
+  max-width: none;
+  object-fit: cover;
 }
 
 .codex-meta {
+  display: grid;
+  gap: 8px;
+}
+
+.codex-heading {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
 }
 
-.codex-meta strong {
+.codex-heading strong {
   font-size: 15px;
   font-weight: 760;
 }
 
-.codex-meta span {
+.codex-heading span {
   color: var(--gold);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
   font-weight: 700;
+}
+
+.codex-meta p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.codex-progress {
+  height: 8px;
+  overflow: hidden;
+  background: rgba(226, 237, 212, 0.08);
+  border-radius: 999px;
+}
+
+.codex-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #9fce83, #efb85b);
+}
+
+.codex-open {
+  height: 38px;
+  border: 1px solid rgba(226, 237, 212, 0.14);
+  border-radius: 7px;
+  background: #26311f;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.codex-open:disabled {
+  opacity: 0.5;
 }
 
 @media (max-width: 760px) {
