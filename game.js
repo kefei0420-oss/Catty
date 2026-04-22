@@ -62,33 +62,33 @@ const fallbackPhotos = [
 
 const allCases = [
   makeCase("床边潜伏", "白色前爪、灰色耳朵，通常贴着软软的布料边缘。", "白爪爪从被边露出来了。", 50, { x: 146, y: 396, w: 182, h: 94, type: "blanket" }),
-  makeCase("纸箱审讯", "纸箱口的阴影很深，里面可能有一双蜂蜜色眼睛。", "箱子开口里出现了猫猫脸。", 48, { x: 742, y: 118, w: 136, h: 126, type: "box" }),
+  makeCase("纸箱审讯", "纸箱口的阴影很深，里面可能有一双蜂蜜色眼睛。", "箱子开口里出现了猫猫脸。", 48, { x: 732, y: 392, w: 142, h: 104, type: "box" }),
   makeCase("玻璃桌下", "灰色地面上，有一块不像家具的暗影。", "玻璃反光里藏着一张小猫脸。", 45, { x: 682, y: 360, w: 150, h: 86, type: "table" }),
   makeCase("窗台冷案", "月光和眼睛都很亮，但只有一个亮点会看你。", "窗台记录员确认猫猫在岗。", 44, { x: 458, y: 170, w: 164, h: 112, type: "window" }),
   makeCase("终极猫窝", "越像猫窝的地方，越要看第二眼。", "猫窝终于承认它今天藏了一只猫。", 42, { x: 438, y: 360, w: 226, h: 136, type: "nest" }),
   makeCase("沙发底线", "沙发底部的阴影边缘，有一点不自然的圆。", "沙发底下传来轻轻呼噜。", 47, { x: 104, y: 382, w: 216, h: 108, type: "sofa" }),
   makeCase("植物假证", "叶子很会挡视线，猫可能躲在花盆后面。", "植物后面露出灰耳朵。", 46, { x: 562, y: 324, w: 138, h: 162, type: "plant" }),
   makeCase("地毯鼓包", "地毯边缘有一块弧度，像偷偷压着什么。", "地毯边缘出现了白色小爪。", 45, { x: 706, y: 392, w: 152, h: 86, type: "rug" }),
-  makeCase("柜门缝隙", "柜门没有完全合上，缝里有一点暖色反光。", "柜门缝里露出小鼻子。", 44, { x: 662, y: 204, w: 132, h: 152, type: "cabinet" }),
-  makeCase("灯下黑", "灯光越亮，旁边的阴影越值得怀疑。", "灯座旁边蹲着一团灰白。", 46, { x: 128, y: 204, w: 122, h: 152, type: "lamp" }),
+  makeCase("柜门缝隙", "柜门没有完全合上，缝里有一点暖色反光。", "柜门缝里露出小鼻子。", 44, { x: 662, y: 350, w: 132, h: 154, type: "cabinet" }),
+  makeCase("灯下黑", "灯光越亮，旁边的阴影越值得怀疑。", "灯座旁边蹲着一团灰白。", 46, { x: 118, y: 272, w: 122, h: 170, type: "lamp" }),
   makeCase("篮子轻响", "篮子明明空着，却像被压低了一点。", "篮子里多了一只猫猫。", 43, { x: 350, y: 414, w: 154, h: 76, type: "basket" }),
-  makeCase("枕头嫌疑", "枕头边角不够平整，像藏着圆圆的头。", "枕头后面有一双大眼睛。", 45, { x: 604, y: 340, w: 180, h: 104, type: "pillow" }),
+  makeCase("枕头嫌疑", "枕头边角不够平整，像藏着圆圆的头。", "枕头后面有一双大眼睛。", 45, { x: 568, y: 394, w: 180, h: 94, type: "pillow" }),
   makeCase("电视柜巡逻", "屏幕附近的黑色边缘，也许不全是家具。", "电视柜旁边发现猫猫巡逻员。", 44, { x: 38, y: 92, w: 172, h: 126, type: "screen" }),
   makeCase("桌脚伏击", "桌脚旁边的阴影太厚，像有东西趴着。", "桌脚旁边伏击失败。", 43, { x: 760, y: 430, w: 120, h: 82, type: "table" }),
   makeCase("床尾软垫", "床尾的软垫边缘有一点白色，别被布纹骗了。", "床尾软垫交出猫猫。", 46, { x: 92, y: 432, w: 178, h: 78, type: "blanket" }),
 ];
 
 const decoyPool = [
-  { x: 602, y: 338, w: 176, h: 106, type: "pillow" },
-  { x: 778, y: 166, w: 92, h: 132, type: "box" },
-  { x: 440, y: 402, w: 130, h: 82, type: "rug" },
+  { x: 580, y: 392, w: 176, h: 96, type: "pillow" },
+  { x: 760, y: 392, w: 112, h: 104, type: "box" },
+  { x: 410, y: 420, w: 150, h: 74, type: "rug" },
   { x: 116, y: 348, w: 186, h: 100, type: "sofa" },
   { x: 566, y: 392, w: 144, h: 82, type: "basket" },
   { x: 382, y: 172, w: 160, h: 118, type: "window" },
   { x: 338, y: 390, w: 150, h: 92, type: "plant" },
-  { x: 530, y: 210, w: 118, h: 140, type: "cabinet" },
-  { x: 118, y: 220, w: 120, h: 150, type: "lamp" },
-  { x: 724, y: 374, w: 128, h: 104, type: "box" },
+  { x: 648, y: 350, w: 126, h: 154, type: "cabinet" },
+  { x: 118, y: 272, w: 120, h: 170, type: "lamp" },
+  { x: 740, y: 386, w: 128, h: 110, type: "nest" },
 ];
 
 let photos = fallbackPhotos;
@@ -131,7 +131,7 @@ function pickSessionCases() {
   sessionCases = shuffle(allCases).slice(0, 5).map((item) => {
     const decoys = shuffle(decoyPool)
       .filter((decoy) => !overlaps(decoy, item.target))
-      .slice(0, 7);
+      .slice(0, 5);
     return { ...item, decoys };
   });
 }
@@ -189,7 +189,7 @@ function drawRoom() {
     }
   }
 
-  drawObject({ x: 38, y: 92, w: 172, h: 126, type: "screen" }, false);
+  drawObject({ x: 54, y: 104, w: 168, h: 116, type: "screen" }, false);
   drawDecorations();
   pixelRect(36, 522, 888, 22, "#252b23");
   pixelRect(70, 544, 44, 58, "#131711");
@@ -197,14 +197,14 @@ function drawRoom() {
 }
 
 function drawDecorations() {
-  drawObject({ x: 256, y: 104, w: 132, h: 96, type: "shelf" }, false);
-  drawObject({ x: 410, y: 96, w: 96, h: 122, type: "plant" }, false);
-  drawObject({ x: 560, y: 122, w: 126, h: 82, type: "frame" }, false);
-  drawObject({ x: 720, y: 98, w: 104, h: 120, type: "cabinet" }, false);
-  drawObject({ x: 266, y: 286, w: 120, h: 80, type: "toy" }, false);
-  drawObject({ x: 74, y: 286, w: 112, h: 80, type: "food" }, false);
-  drawObject({ x: 826, y: 304, w: 74, h: 92, type: "scratcher" }, false);
-  drawObject({ x: 516, y: 300, w: 112, h: 70, type: "bookpile" }, false);
+  drawObject({ x: 288, y: 112, w: 136, h: 78, type: "shelf" }, false);
+  drawObject({ x: 566, y: 110, w: 126, h: 86, type: "frame" }, false);
+  drawObject({ x: 784, y: 118, w: 96, h: 118, type: "window" }, false);
+  drawObject({ x: 94, y: 346, w: 220, h: 112, type: "sofa" }, false);
+  drawObject({ x: 358, y: 382, w: 142, h: 98, type: "plant" }, false);
+  drawObject({ x: 802, y: 360, w: 74, h: 124, type: "scratcher" }, false);
+  drawObject({ x: 246, y: 462, w: 114, h: 56, type: "toy" }, false);
+  drawObject({ x: 538, y: 452, w: 112, h: 58, type: "bookpile" }, false);
 }
 
 function drawObject(area, isTarget) {
