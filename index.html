@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catty - 找猫猫</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="hero">
+        <div class="brand">
+          <span class="spark" aria-hidden="true"></span>
+          <p>Catty</p>
+        </div>
+        <h1>找猫猫</h1>
+        <p class="tagline">像素房间里，灰白小猫正在偷偷观察你。</p>
+      </section>
+
+      <section class="game-panel" aria-label="找猫猫游戏">
+        <div class="hud">
+          <div class="stat">
+            <span>关卡</span>
+            <strong id="levelText">1 / 5</strong>
+          </div>
+          <div class="stat">
+            <span>时间</span>
+            <strong id="timeText">45</strong>
+          </div>
+          <div class="stat">
+            <span>发现</span>
+            <strong id="scoreText">0</strong>
+          </div>
+          <button id="soundButton" class="icon-button" type="button" aria-label="声音" title="声音">♪</button>
+          <button id="resetButton" class="icon-button" type="button" aria-label="重开" title="重开">↻</button>
+        </div>
+
+        <div class="stage-wrap">
+          <canvas id="gameCanvas" width="960" height="640" aria-label="像素猫猫房间"></canvas>
+          <div id="toast" class="toast" role="status" aria-live="polite"></div>
+          <div id="foundCard" class="found-card" aria-hidden="true">
+            <img id="foundImage" src="assets/cat-1.jpg" alt="灰白猫猫像素照片">
+            <div>
+              <p id="foundTitle">找到啦</p>
+              <span id="foundNote">金色眼睛正在发光。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="hintButton" class="primary-button" type="button">提示</button>
+          <button id="nextButton" class="primary-button" type="button" disabled>下一关</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="game.js"></script>
+  </body>
+</html>
