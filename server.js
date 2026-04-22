@@ -9,9 +9,18 @@ let totalFinds = 0;
 let latestFind = null;
 
 function getPhotoFiles() {
+  const webDir = path.join(publicDir, "assets", "cats-web");
   const catsDir = path.join(publicDir, "assets", "cats");
-  const photoDir = fs.existsSync(catsDir) ? catsDir : path.join(publicDir, "assets");
-  const prefix = fs.existsSync(catsDir) ? "assets/cats" : "assets";
+  const photoDir = fs.existsSync(webDir)
+    ? webDir
+    : fs.existsSync(catsDir)
+      ? catsDir
+      : path.join(publicDir, "assets");
+  const prefix = fs.existsSync(webDir)
+    ? "assets/cats-web"
+    : fs.existsSync(catsDir)
+      ? "assets/cats"
+      : "assets";
 
   return fs
     .readdirSync(photoDir, { withFileTypes: true })
