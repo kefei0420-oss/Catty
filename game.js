@@ -4,6 +4,7 @@ const ctx = canvas.getContext("2d");
 const levelText = document.querySelector("#levelText");
 const timeText = document.querySelector("#timeText");
 const scoreText = document.querySelector("#scoreText");
+const globalText = document.querySelector("#globalText");
 const toast = document.querySelector("#toast");
 const foundCard = document.querySelector("#foundCard");
 const foundImage = document.querySelector("#foundImage");
@@ -102,6 +103,35 @@ let muted = false;
 let timerId = null;
 let toastId = null;
 let pulse = 0;
+let globalFinds = 0;
+
+async function loadStats() {
+  try {
+    const response = await fetch("/api/stats");
+    if (!response.ok) return;
+    const stats = await response.json();
+    globalFinds = Number(stats.totalFinds || 0);
+    updateHud();
+  } catch {
+    globalText.textContent = "-";
+  }
+}
+
+async function recordFind(levelName) {
+  try {
+    const response = await fetch("/api/find", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ level: levelName }),
+    });
+    if (!response.ok) return;
+    const stats = await response.json();
+    globalFinds = Number(stats.totalFinds || 0);
+    updateHud();
+  } catch {
+    globalText.textContent = "-";
+  }
+}
 
 function pixelRect(x, y, w, h, color) {
   ctx.fillStyle = color;
@@ -290,6 +320,7 @@ function updateHud() {
   levelText.textContent = `${levelIndex + 1} / ${levels.length}`;
   timeText.textContent = String(Math.max(0, remaining));
   scoreText.textContent = String(found);
+  globalText.textContent = String(globalFinds);
 }
 
 function revealCat() {
@@ -306,6 +337,7 @@ function revealCat() {
   setToast("喵！抓到这只灰白小猫了。");
   chirp(true);
   updateHud();
+  recordFind(level.name);
 }
 
 function startTimer() {
@@ -377,5 +409,6 @@ soundButton.addEventListener("click", () => {
   setToast(muted ? "静音" : "声音打开");
 });
 
+loadStats();
 loadLevel(0);
 render();
