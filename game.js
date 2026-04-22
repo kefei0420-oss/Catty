@@ -13,12 +13,6 @@ const foundNote = document.querySelector("#foundNote");
 const caseLabel = document.querySelector("#caseLabel");
 const caseTitle = document.querySelector("#caseTitle");
 const caseClue = document.querySelector("#caseClue");
-const finalGallery = document.querySelector("#finalGallery");
-const closeGalleryButton = document.querySelector("#closeGalleryButton");
-const slideImage = document.querySelector("#slideImage");
-const slideCaption = document.querySelector("#slideCaption");
-const prevSlideButton = document.querySelector("#prevSlideButton");
-const nextSlideButton = document.querySelector("#nextSlideButton");
 const photoModal = document.querySelector("#photoModal");
 const photoModalImage = document.querySelector("#photoModalImage");
 const roundPhotoButton = document.querySelector("#roundPhotoButton");
@@ -70,9 +64,7 @@ const fallbackPhotos = [
   "assets/20260422-225115.jpeg",
 ];
 
-const PUZZLE_GRID = 3;
-const PUZZLE_PIECES = PUZZLE_GRID * PUZZLE_GRID;
-const PROFILE_KEY = "catty-puzzle-profile-v1";
+const PROFILE_KEY = "catty-photo-codex-v1";
 
 const allCases = [
   makeCase("床边潜伏", "白色前爪、灰色耳朵，通常贴着软软的布料边缘。", "白爪爪从被边露出来了。", 50, { x: 146, y: 396, w: 182, h: 94, type: "blanket" }),
@@ -135,8 +127,6 @@ let mouse = { x: 480, y: 320, active: false };
 let audio = null;
 let musicOn = false;
 let musicTimer = null;
-let slideIndex = 0;
-let slideTimer = null;
 let rewardGranted = false;
 let profile = loadProfile();
 saveProfile();
@@ -204,26 +194,13 @@ function saveProfile() {
   localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
 }
 
-function getPieces(photo) {
-  return Array.isArray(profile.collection[photo]) ? profile.collection[photo] : [];
+function isUnlocked(photo) {
+  return Boolean(profile.collection[photo]);
 }
 
-function hasPiece(photo, piece) {
-  return getPieces(photo).includes(piece);
-}
-
-function addPiece(photo, piece) {
-  const pieces = new Set(getPieces(photo));
-  pieces.add(piece);
-  profile.collection[photo] = Array.from(pieces).sort((a, b) => a - b);
+function unlockPhoto(photo) {
+  profile.collection[photo] = true;
   saveProfile();
-}
-
-function piecePosition(piece) {
-  return {
-    col: piece % PUZZLE_GRID,
-    row: Math.floor(piece / PUZZLE_GRID),
-  };
 }
 
 function photoKey(photo) {
@@ -236,48 +213,21 @@ function migrateCollectionToCurrentPhotos() {
 
   Object.entries(profile.collection || {}).forEach(([storedPhoto, pieces]) => {
     const normalized = photoMap.get(photoKey(storedPhoto)) || storedPhoto;
-    const uniquePieces = Array.from(new Set(Array.isArray(pieces) ? pieces : [])).sort((a, b) => a - b);
-    const current = new Set(Array.isArray(nextCollection[normalized]) ? nextCollection[normalized] : []);
-    uniquePieces.forEach((piece) => current.add(piece));
-    nextCollection[normalized] = Array.from(current).sort((a, b) => a - b);
+    nextCollection[normalized] = Boolean(pieces) || Array.isArray(pieces) && pieces.length > 0;
   });
 
   profile.collection = nextCollection;
   saveProfile();
 }
 
-function renderPieceInto(element, photo, piece) {
-  const { col, row } = piecePosition(piece);
-  element.innerHTML = "";
+function renderRewardPhoto(photo) {
   const img = document.createElement("img");
-  img.className = "piece-face";
+  img.className = "reward-photo";
   img.src = photo;
   img.alt = "";
   img.draggable = false;
-  img.style.width = `${PUZZLE_GRID * 100}%`;
-  img.style.height = `${PUZZLE_GRID * 100}%`;
-  img.style.left = `${col * -100}%`;
-  img.style.top = `${row * -100}%`;
-  element.appendChild(img);
-}
-
-function renderRewardPiece(photo, piece, complete = false) {
   rewardPiecePreview.innerHTML = "";
-  rewardPiecePreview.classList.toggle("complete", complete);
-
-  const full = document.createElement("img");
-  full.className = "reward-piece-full";
-  full.src = photo;
-  full.alt = "";
-  full.draggable = false;
-  rewardPiecePreview.appendChild(full);
-
-  if (!complete) {
-    const spotlight = document.createElement("div");
-    spotlight.className = "reward-piece-spotlight";
-    renderPieceInto(spotlight, photo, piece);
-    rewardPiecePreview.appendChild(spotlight);
-  }
+  rewardPiecePreview.appendChild(img);
 }
 
 function openPhoto(src, alt = "猫猫照片") {
@@ -614,29 +564,12 @@ function newGame() {
   loadLevel(0);
 }
 
-function renderSlide() {
-  const src = photos[slideIndex % photos.length] || fallbackPhotos[0];
-  slideImage.src = src;
-  slideCaption.textContent = `No. ${String(slideIndex + 1).padStart(2, "0")} / ${photos.length}`;
-}
-
-function nextSlide(step = 1) {
-  slideIndex = (slideIndex + step + photos.length) % photos.length;
-  renderSlide();
-}
-
 function showFinalGallery() {
   rewardFanfare();
   if (!rewardGranted) {
     rewardGranted = true;
-    grantPuzzlePiece();
+    grantPhotoReward();
   }
-}
-
-function hideFinalGallery() {
-  finalGallery.classList.remove("show");
-  finalGallery.setAttribute("aria-hidden", "true");
-  clearInterval(slideTimer);
 }
 
 function showRoundPhoto() {
@@ -648,26 +581,15 @@ function hideRoundPhoto() {
   photoModal.setAttribute("aria-hidden", "true");
 }
 
-function grantPuzzlePiece() {
-  const candidates = photos
-    .map((photo) => ({
-      photo,
-      missing: Array.from({ length: PUZZLE_PIECES }, (_, piece) => piece).filter((piece) => !hasPiece(photo, piece)),
-    }))
-    .filter((item) => item.missing.length);
-
-  if (!candidates.length) {
-    renderRewardPiece(photos[0] || fallbackPhotos[0], 0, true);
-    rewardPieceText.textContent = "你已经集齐全部猫猫拼图了。";
-    showPieceReward();
-    return;
-  }
-
-  const prize = candidates[Math.floor(Math.random() * candidates.length)];
-  const piece = prize.missing[Math.floor(Math.random() * prize.missing.length)];
-  addPiece(prize.photo, piece);
-  renderRewardPiece(prize.photo, piece, false);
-  rewardPieceText.textContent = `获得 ${piece + 1} / ${PUZZLE_PIECES} 号拼图，已加入你的猫猫图鉴。`;
+function grantPhotoReward() {
+  const locked = photos.filter((photo) => !isUnlocked(photo));
+  const prize = (locked.length ? locked : photos)[Math.floor(Math.random() * (locked.length ? locked : photos).length)] || fallbackPhotos[0];
+  const duplicate = isUnlocked(prize);
+  unlockPhoto(prize);
+  renderRewardPhoto(prize);
+  rewardPieceText.textContent = duplicate
+    ? "这张猫猫照片你已经收过啦，不过还是可以去图鉴里再看看。"
+    : "解锁了一张新的猫猫照片，已经加入你的猫猫图鉴。";
   showPieceReward();
 }
 
@@ -684,57 +606,38 @@ function hidePieceReward() {
 function renderCodex() {
   playerIdText.textContent = profile.playerId;
   codexGrid.innerHTML = "";
-  const orderedPhotos = [...photos].sort((a, b) => getPieces(b).length - getPieces(a).length);
+  const orderedPhotos = [...photos].sort((a, b) => Number(isUnlocked(b)) - Number(isUnlocked(a)));
 
   orderedPhotos.forEach((photo, index) => {
-    const pieces = getPieces(photo);
+    const unlocked = isUnlocked(photo);
     const card = document.createElement("article");
-    const frame = document.createElement("div");
     const preview = document.createElement("img");
-    const grid = document.createElement("div");
     const meta = document.createElement("div");
-    const heading = document.createElement("div");
     const title = document.createElement("strong");
     const progress = document.createElement("span");
     const status = document.createElement("p");
-    const progressBar = document.createElement("div");
-    const progressFill = document.createElement("i");
     const action = document.createElement("button");
 
     card.className = "codex-card";
-    frame.className = "codex-frame";
     preview.className = "codex-photo";
-    grid.className = "puzzle-grid";
     title.textContent = `Cat ${String(index + 1).padStart(2, "0")}`;
-    progress.textContent = `${pieces.length} / ${PUZZLE_PIECES}`;
-    status.textContent = pieces.length === PUZZLE_PIECES ? "已集齐" : pieces.length ? "收集中" : "未解锁";
+    progress.textContent = unlocked ? "已收录" : "未收录";
+    status.textContent = unlocked ? "这张猫猫已经加入你的图鉴。" : "通关后会随机解锁新的猫猫照片。";
     action.className = "codex-open";
     action.type = "button";
-    action.textContent = pieces.length === PUZZLE_PIECES ? "查看大图" : "继续收集";
-    action.disabled = pieces.length !== PUZZLE_PIECES;
+    action.textContent = unlocked ? "查看大图" : "继续收集";
+    action.disabled = !unlocked;
     preview.src = photo;
     preview.alt = "";
     preview.draggable = false;
-    progressBar.className = "codex-progress";
-    progressFill.style.width = `${(pieces.length / PUZZLE_PIECES) * 100}%`;
-
-    for (let piece = 0; piece < PUZZLE_PIECES; piece += 1) {
-      const cell = document.createElement("div");
-      cell.className = hasPiece(photo, piece) ? "puzzle-cell owned" : "puzzle-cell";
-      if (hasPiece(photo, piece)) renderPieceInto(cell, photo, piece);
-      grid.appendChild(cell);
-    }
-
     meta.className = "codex-meta";
-    heading.className = "codex-heading";
-    heading.append(title, progress);
-    progressBar.append(progressFill);
-    meta.append(heading, status, progressBar, action);
-    frame.append(preview, grid);
-    card.append(frame, meta);
-    if (pieces.length === PUZZLE_PIECES) {
+    meta.append(title, progress, status, action);
+    card.append(preview, meta);
+    if (unlocked) {
       card.classList.add("complete");
       action.addEventListener("click", () => openPhoto(photo, `${title.textContent} 完整照片`));
+    } else {
+      card.classList.add("locked");
     }
     codexGrid.appendChild(card);
   });
